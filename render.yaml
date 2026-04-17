@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: obpaz-chatbot
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: DATA_DIR
+        value: ./OBPAZ - Banco de Dados-20260417T222334Z-3-001/OBPAZ - Banco de Dados
