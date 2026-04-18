@@ -45,6 +45,7 @@ const messages = [
 
 let loading = false;
 let currentSuggestions = [];
+let currentSuggestionBucket = null;
 
 function escapeHtml(value) {
   return String(value)
@@ -94,17 +95,21 @@ function setLoading(value) {
   renderMessages();
 }
 
-function shuffle(items) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
+function getSuggestionBucket() {
+  return Math.floor(Date.now() / (5 * 60 * 1000));
 }
 
-function renderSuggestions() {
-  currentSuggestions = shuffle(SUGGESTION_POOL).slice(0, 4);
+function getRotatingSuggestions(bucket) {
+  const start = (bucket * 4) % SUGGESTION_POOL.length;
+  return Array.from({ length: 4 }, (_, index) => SUGGESTION_POOL[(start + index) % SUGGESTION_POOL.length]);
+}
+
+function renderSuggestions(force = false) {
+  const bucket = getSuggestionBucket();
+  if (!force && bucket === currentSuggestionBucket) return;
+
+  currentSuggestionBucket = bucket;
+  currentSuggestions = getRotatingSuggestions(bucket);
   suggestionsEl.innerHTML = currentSuggestions
     .map((suggestion) => `<button type="button" data-suggestion="${escapeHtml(suggestion)}">${escapeHtml(suggestion)}</button>`)
     .join("");
@@ -181,6 +186,6 @@ fetch("/api/health")
     statusEl.textContent = "Serviço indisponível";
   });
 
-renderSuggestions();
-setInterval(renderSuggestions, 5 * 60 * 1000);
+renderSuggestions(true);
+setInterval(renderSuggestions, 15 * 1000);
 renderMessages();

@@ -304,6 +304,10 @@ function localTopicAnswer(question) {
     return "De modo geral, a paz deve ser entendida como um processo amplo: não basta ausência de guerra, é preciso enfrentar desigualdades, violências e injustiças. Por isso, educação para a paz envolve pensamento crítico, diálogo e compromisso com direitos humanos.";
   }
 
+  if (terms.has("herrera") || terms.has("flores")) {
+    return "Joaquín Herrera Flores foi um pensador ligado à teoria crítica dos direitos humanos. Sua contribuição ajuda a entender os direitos humanos como processos de luta por dignidade, justiça e acesso real aos bens necessários para viver bem, não apenas como normas escritas. Dentro da cultura de paz, essa visão reforça que a paz depende de condições concretas de dignidade e participação social.";
+  }
+
   const matchedFaq = faqAnswer(question);
   if (matchedFaq) return matchedFaq;
 
