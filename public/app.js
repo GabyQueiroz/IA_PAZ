@@ -5,15 +5,20 @@ const statusEl = document.querySelector("#status");
 const suggestionsEl = document.querySelector("#suggestions");
 
 const SUGGESTION_POOL = [
+  "O que é paz?",
   "O que é cultura de paz?",
   "O que é educação para a paz?",
   "Explique paz positiva e paz negativa",
   "Por que paz não é só ausência de guerra?",
-  "Como transformar conflitos sem violência?",
   "Qual a relação entre paz e direitos humanos?",
   "O que é violência estrutural?",
+  "O que são violências direta, estrutural e cultural?",
   "Como a escola pode promover cultura de paz?",
   "Quem foi Johan Galtung?",
+  "Quem foi Herrera Flores?",
+  "Quais são as bases da educação para a paz?",
+  "Quais são as questões gerais sobre a paz?",
+  "Como transformar conflitos sem violência?",
   "Cultura de paz significa evitar conflitos?",
   "Como praticar cultura de paz no cotidiano?",
   "Qual o papel da justiça social na paz?",

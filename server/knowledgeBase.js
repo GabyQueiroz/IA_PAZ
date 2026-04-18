@@ -11,6 +11,11 @@ const CHUNK_OVERLAP = 220;
 
 const FAQ_ENTRIES = [
   {
+    question: "O que é paz?",
+    answer:
+      "Paz é uma forma de convivência baseada em dignidade, justiça, respeito e ausência de violência. Ela não significa apenas não haver guerra ou briga; envolve criar condições para que as pessoas vivam com segurança, direitos, diálogo e reconhecimento."
+  },
+  {
     question: "O que é cultura de paz?",
     answer:
       "Cultura de paz é um modo de viver e organizar as relações sociais com base no diálogo, no respeito, na cooperação, nos direitos humanos e na transformação não violenta dos conflitos. Ela não é apenas ausência de guerra; também envolve enfrentar desigualdades, injustiças e violências que impedem uma convivência digna."

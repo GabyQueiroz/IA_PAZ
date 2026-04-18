@@ -1,5 +1,9 @@
 # FAQ Cultura de Paz
 
+## O que é paz?
+
+Paz é uma forma de convivência baseada em dignidade, justiça, respeito e ausência de violência. Ela não significa apenas não haver guerra ou briga; envolve criar condições para que as pessoas vivam com segurança, direitos, diálogo e reconhecimento.
+
 ## O que é cultura de paz?
 
 Cultura de paz é um modo de viver e organizar as relações sociais com base no diálogo, no respeito, na cooperação, nos direitos humanos e na transformação não violenta dos conflitos. Ela não é apenas ausência de guerra; também envolve enfrentar desigualdades, injustiças e violências que impedem uma convivência digna.
