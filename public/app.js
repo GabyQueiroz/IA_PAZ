@@ -2,7 +2,9 @@ const messagesEl = document.querySelector("#messages");
 const composerEl = document.querySelector("#composer");
 const inputEl = document.querySelector("#messageInput");
 const statusEl = document.querySelector("#status");
+const statusTextEl = document.querySelector("#statusText");
 const suggestionsEl = document.querySelector("#suggestions");
+const heroCtaEl = document.querySelector("#heroCta");
 
 const SUGGESTION_POOL = [
   "O que é paz?",
@@ -100,8 +102,8 @@ function getSuggestionBucket() {
 }
 
 function getRotatingSuggestions(bucket) {
-  const start = (bucket * 4) % SUGGESTION_POOL.length;
-  return Array.from({ length: 4 }, (_, index) => SUGGESTION_POOL[(start + index) % SUGGESTION_POOL.length]);
+  const start = (bucket * 5) % SUGGESTION_POOL.length;
+  return Array.from({ length: 5 }, (_, index) => SUGGESTION_POOL[(start + index) % SUGGESTION_POOL.length]);
 }
 
 function renderSuggestions(force = false) {
@@ -175,15 +177,21 @@ inputEl.addEventListener("keydown", (event) => {
   }
 });
 
+heroCtaEl?.addEventListener("click", () => {
+  document.querySelector(".chat-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  inputEl.focus();
+});
+
 fetch("/api/health")
   .then((response) => response.json())
   .then((health) => {
-    statusEl.textContent = health.ok
+    statusEl.classList.toggle("is-online", Boolean(health.ok));
+    statusTextEl.textContent = health.ok
       ? `Pronto para conversar · modo ${health.ai === "openai" ? "IA" : "local"}`
       : "Serviço indisponível";
   })
   .catch(() => {
-    statusEl.textContent = "Serviço indisponível";
+    statusTextEl.textContent = "Serviço indisponível";
   });
 
 renderSuggestions(true);

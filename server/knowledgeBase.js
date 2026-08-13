@@ -1,81 +1,48 @@
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";
 import { answerPracticalQuestion, isPracticalPeaceQuestion } from "./practicalGuidance.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const SUPPORTED_EXTENSIONS = new Set([".pdf", ".docx", ".txt", ".md"]);
 const CHUNK_SIZE = 1300;
 const CHUNK_OVERLAP = 220;
+const FAQ_MATCH_THRESHOLD = 0.35;
+const QA_DATABASE_PATH = path.join(__dirname, "data", "qaDatabase.json");
 
-const FAQ_ENTRIES = [
-  {
-    question: "O que é paz?",
-    answer:
-      "Paz é uma forma de convivência baseada em dignidade, justiça, respeito e ausência de violência. Ela não significa apenas não haver guerra ou briga; envolve criar condições para que as pessoas vivam com segurança, direitos, diálogo e reconhecimento."
-  },
-  {
-    question: "O que é cultura de paz?",
-    answer:
-      "Cultura de paz é um modo de viver e organizar as relações sociais com base no diálogo, no respeito, na cooperação, nos direitos humanos e na transformação não violenta dos conflitos. Ela não é apenas ausência de guerra; também envolve enfrentar desigualdades, injustiças e violências que impedem uma convivência digna."
-  },
-  {
-    question: "O que é educação para a paz?",
-    answer:
-      "Educação para a paz é uma prática formativa que ajuda as pessoas a compreender conflitos, reconhecer violências, dialogar, cooperar e defender direitos humanos. Ela busca formar sujeitos críticos, capazes de agir no cotidiano para construir relações mais justas e não violentas."
-  },
-  {
-    question: "Qual é a diferença entre paz positiva e paz negativa?",
-    answer:
-      "Paz negativa é a ausência de violência direta, como guerra, agressão ou confronto armado. Paz positiva é mais profunda: envolve justiça social, dignidade, igualdade, participação e enfrentamento das violências estruturais e culturais."
-  },
-  {
-    question: "Por que paz não é só ausência de guerra?",
-    answer:
-      "Porque uma sociedade pode não estar em guerra e ainda assim manter desigualdade, exclusão, racismo, pobreza, medo e violações de direitos. A paz exige condições concretas de vida digna e relações sociais menos violentas."
-  },
-  {
-    question: "Como transformar conflitos de forma não violenta?",
-    answer:
-      "Transformar conflitos de forma não violenta envolve escuta, diálogo, reconhecimento das necessidades das pessoas envolvidas, mediação, justiça e busca de soluções que não dependam de imposição ou agressão."
-  },
-  {
-    question: "Qual é a relação entre paz e direitos humanos?",
-    answer:
-      "Paz e direitos humanos caminham juntos. Não há paz plena onde a dignidade humana é violada. Defender direitos humanos é fortalecer condições de justiça, reconhecimento e convivência mais segura."
-  },
-  {
-    question: "O que são violências direta, estrutural e cultural?",
-    answer:
-      "Violência direta é a agressão visível, como ataque físico ou ameaça. Violência estrutural aparece nas desigualdades e injustiças organizadas pela sociedade. Violência cultural está nas ideias, valores e discursos que justificam ou naturalizam a violência."
-  },
-  {
-    question: "Como a escola pode promover cultura de paz?",
-    answer:
-      "A escola pode promover cultura de paz por meio do diálogo, da mediação de conflitos, da participação dos estudantes, da valorização da diversidade, da educação em direitos humanos e de práticas pedagógicas que enfrentem preconceitos e violências."
-  },
-  {
-    question: "Quem foi Johan Galtung?",
-    answer:
-      "Johan Galtung foi um pesquisador central nos estudos para a paz. Ele é conhecido por discutir paz positiva, paz negativa e diferentes formas de violência, ajudando a ampliar a compreensão da paz para além da ausência de guerra."
-  },
-  {
-    question: "A cultura de paz significa evitar conflitos?",
-    answer:
-      "Não. Cultura de paz não significa fingir que conflitos não existem. Ela propõe lidar com eles de forma responsável, crítica e não violenta, buscando transformar as causas do problema."
-  },
-  {
-    question: "Como praticar cultura de paz no cotidiano?",
-    answer:
-      "É possível praticar cultura de paz ouvindo com atenção, evitando humilhações, respeitando diferenças, buscando diálogo em conflitos, combatendo preconceitos e agindo com responsabilidade diante de injustiças."
-  },
-  {
-    question: "Qual é o papel da justiça social na paz?",
-    answer:
-      "Justiça social é essencial para a paz porque desigualdades profundas produzem sofrimento, exclusão e violência. Uma paz duradoura depende de condições de vida digna, acesso a direitos e participação social."
+/**
+ * Banco de perguntas e respostas (FAQ) carregado de server/data/qaDatabase.json.
+ * Cada entrada: { id, tema, pergunta, resposta, fontes }.
+ * Para adicionar/editar perguntas, edite apenas o JSON — não é preciso mexer neste arquivo.
+ */
+function loadQaDatabase() {
+  if (!fsSync.existsSync(QA_DATABASE_PATH)) return [];
+
+  try {
+    const raw = fsSync.readFileSync(QA_DATABASE_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry) => entry && entry.pergunta && entry.resposta);
+  } catch (error) {
+    console.warn("Falha ao carregar qaDatabase.json:", error.message);
+    return [];
   }
-];
+}
+
+const QA_DATABASE = loadQaDatabase();
+
+const FAQ_ENTRIES = QA_DATABASE.map((entry) => ({
+  id: entry.id,
+  tema: entry.tema,
+  question: entry.pergunta,
+  answer: entry.resposta,
+  fontes: entry.fontes || []
+}));
 
 const STOPWORDS = new Set(
   [
@@ -249,6 +216,27 @@ function splitIntoChunks(text, source) {
   return chunks;
 }
 
+function buildQaChunks(qaEntries) {
+  return qaEntries.map((entry) => {
+    const content = `${entry.pergunta}\n${entry.resposta}`;
+    const tokens = tokenize(content);
+    const termCounts = new Map();
+    tokens.forEach((token) => termCounts.set(token, (termCounts.get(token) || 0) + 1));
+
+    return {
+      id: `qa-${entry.id}`,
+      source: {
+        name: `Banco de Perguntas — ${entry.tema}`,
+        relativePath: "server/data/qaDatabase.json",
+        characters: content.length
+      },
+      content: entry.resposta,
+      tokens,
+      termCounts
+    };
+  });
+}
+
 function sentenceCandidates(chunks, queryTerms) {
   return chunks
     .flatMap((chunk) =>
@@ -282,7 +270,7 @@ function faqAnswer(question) {
     score: scoreTerms(question, entry.question)
   })).sort((a, b) => b.score - a.score);
 
-  return ranked[0]?.score >= 0.35 ? ranked[0].answer : "";
+  return ranked[0]?.score >= FAQ_MATCH_THRESHOLD ? ranked[0].answer : "";
 }
 
 function localTopicAnswer(question) {
@@ -382,6 +370,16 @@ export async function createKnowledgeBase() {
     }
   }
 
+  if (QA_DATABASE.length) {
+    documents.push({
+      name: `Banco de Perguntas e Respostas (${QA_DATABASE.length} itens)`,
+      relativePath: "server/data/qaDatabase.json",
+      characters: QA_DATABASE.reduce((sum, e) => sum + e.pergunta.length + e.resposta.length, 0),
+      chunks: QA_DATABASE.length
+    });
+    chunks.push(...buildQaChunks(QA_DATABASE));
+  }
+
   if (!chunks.length) {
     throw new Error("Nenhum conteúdo legível foi encontrado na base OBPAZ.");
   }
@@ -450,6 +448,7 @@ export async function createKnowledgeBase() {
     dataDir,
     documents,
     chunksCount: chunks.length,
+    faqCount: FAQ_ENTRIES.length,
     search,
     buildLocalAnswer
   };
