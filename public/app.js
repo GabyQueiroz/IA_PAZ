@@ -57,9 +57,9 @@ const SUGGESTIONS = {
 };
 
 const GREETINGS = {
-  crianca: "Oi! 😊 Eu sou o OBPAZ. Adoro conversar sobre paz, amizade, sentimentos e como resolver brigas sem machucar ninguém. Pode perguntar o que quiser!",
-  adolescente: "Oi! Sou o OBPAZ. Posso conversar sobre conflitos, respeito, bullying, emoções, direitos humanos e cultura de paz.",
-  adulto: "Olá! Sou o OBPAZ, assistente sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Minhas respostas se baseiam no material do OBPAZ/InterPaz-UEPG."
+  crianca: "Oi! 😊 Eu sou a Olive, a guia do OBPAZ. Adoro conversar sobre paz, amizade, sentimentos e como resolver brigas sem machucar ninguém. Pode perguntar o que quiser!",
+  adolescente: "Oi! Sou a Olive, do OBPAZ. Posso conversar sobre conflitos, respeito, bullying, emoções, direitos humanos e cultura de paz.",
+  adulto: "Olá! Sou a Olive, assistente do OBPAZ sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Minhas respostas se baseiam no material do OBPAZ/InterPaz-UEPG."
 };
 
 function readProfile() {
@@ -138,17 +138,55 @@ function speak(text, button) {
   }
   const utterance = new SpeechSynthesisUtterance(text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ""));
   utterance.lang = "pt-BR";
-  utterance.rate = audience === "crianca" ? 0.92 : 1;
-  const voice = speechSynthesis.getVoices().find((v) => v.lang?.toLowerCase().startsWith("pt-br"));
-  if (voice) utterance.voice = voice;
+  // Voz da Olive: voz feminina em português, mais aguda, para soar como uma menina.
+  utterance.voice = oliveVoice();
+  utterance.pitch = 1.7;
+  utterance.rate = audience === "crianca" ? 1.0 : 1.05;
   button.classList.add("active");
   button.dataset.playing = "1";
-  utterance.onend = () => {
+  setOliveTalking(true);
+  utterance.onend = utterance.onerror = () => {
     button.classList.remove("active");
     button.dataset.playing = "0";
+    setOliveTalking(false);
   };
   speechSynthesis.speak(utterance);
 }
+
+// Escolhe a voz feminina em português do Brasil disponível no aparelho (gratuita, do próprio navegador).
+const FEMALE_VOICE_HINTS = ["francisca", "maria", "luciana", "vitoria", "vitória", "thalita", "leila", "female", "feminina", "google português do brasil"];
+function oliveVoice() {
+  const voices = speechSynthesis.getVoices().filter((v) => v.lang?.toLowerCase().replace("_", "-").startsWith("pt-br"));
+  return (
+    voices.find((v) => FEMALE_VOICE_HINTS.some((hint) => v.name.toLowerCase().includes(hint))) ||
+    voices.find((v) => !/daniel|antonio|ant[oô]nio|male|masculin/i.test(v.name)) ||
+    voices[0] ||
+    null
+  );
+}
+if (canSpeak) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+// ---------- Olive, a guia ----------
+const oliveGuide = document.querySelector("#oliveGuide");
+const oliveBubble = document.querySelector("#oliveBubble");
+let oliveBubbleTimer = null;
+function oliveSays(text, ms = 6000) {
+  if (!oliveBubble) return;
+  oliveBubble.textContent = text;
+  oliveBubble.classList.add("show");
+  clearTimeout(oliveBubbleTimer);
+  oliveBubbleTimer = setTimeout(() => oliveBubble.classList.remove("show"), ms);
+}
+function setOliveTalking(value) {
+  oliveGuide?.classList.toggle("talking", value);
+}
+function oliveCheer() {
+  if (!oliveGuide) return;
+  oliveGuide.classList.remove("cheer");
+  void oliveGuide.offsetWidth;
+  oliveGuide.classList.add("cheer");
+}
+setTimeout(() => oliveSays("Oi! Eu sou a Olive. Vamos conversar sobre paz? 🕊️", 7000), 600);
 
 // ---------- Mensagens ----------
 function addUserMessage(text) {
@@ -330,6 +368,9 @@ async function sendMessage(rawText) {
     setLoading(false);
     handleAudienceChange(data);
     addAssistantMessage(data);
+    oliveCheer();
+    if (data.story) oliveSays("Olha a historinha que eu preparei! 📖");
+    else if (data.kind === "risk") oliveSays("Estou aqui com você. Procure um adulto de confiança. 💛", 9000);
     history.push({ role: "user", content: text }, { role: "assistant", content: data.answer });
   } catch (error) {
     setLoading(false);
@@ -367,7 +408,7 @@ fetch("/api/health")
 setAudience(audience);
 sendButton.disabled = true;
 if (!profile) {
-  addAssistantMessage({ answer: "Olá! Eu sou o OBPAZ, um assistente sobre paz, convivência e direitos humanos. 🕊️" });
+  addAssistantMessage({ answer: "Olá! Eu sou a Olive, a guia do OBPAZ. Converso sobre paz, convivência e direitos humanos. 🕊️" });
   showProfilePicker();
 } else {
   addAssistantMessage({ answer: GREETINGS[audience] });

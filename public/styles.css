@@ -692,3 +692,98 @@ body[data-audience="crianca"] .profile-pill {
     transition: none !important;
   }
 }
+
+/* ---------- Olive, a guia ---------- */
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+  border-radius: inherit;
+  background: #fff;
+}
+
+.olive-guide {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 20;
+  width: 150px;
+  pointer-events: none;
+}
+
+.olive-guide img {
+  display: block;
+  width: 100%;
+  transform-origin: 50% 100%;
+  animation: olive-float 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 10px 16px rgba(22, 107, 91, 0.25));
+}
+
+.olive-guide.talking img {
+  animation: olive-talk 0.45s ease-in-out infinite alternate, olive-float 3.2s ease-in-out infinite;
+}
+
+.olive-guide.cheer img {
+  animation: olive-cheer 0.9s ease-in-out 2;
+}
+
+.olive-bubble {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 2px solid #9fd6c7;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 24px rgba(22, 107, 91, 0.16);
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.olive-bubble::after {
+  content: "";
+  position: absolute;
+  left: 34px;
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-right: 2px solid #9fd6c7;
+  border-bottom: 2px solid #9fd6c7;
+  transform: rotate(45deg);
+}
+
+.olive-bubble.show {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes olive-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@keyframes olive-talk {
+  from { transform: rotate(-3deg) scale(1); }
+  to { transform: rotate(3deg) scale(1.03); }
+}
+
+@keyframes olive-cheer {
+  0%, 100% { transform: rotate(0) translateY(0); }
+  30% { transform: rotate(-8deg) translateY(-10px); }
+  60% { transform: rotate(6deg) translateY(-4px); }
+}
+
+/* Em telas menores, a Olive fica pequena no canto, sem cobrir o chat. */
+@media (max-width: 1240px) {
+  .olive-guide { width: 92px; left: 8px; bottom: 96px; }
+  .olive-bubble { display: none; }
+}
+
+@media (max-width: 720px) {
+  .olive-guide { width: 64px; bottom: 140px; opacity: 0.95; }
+}

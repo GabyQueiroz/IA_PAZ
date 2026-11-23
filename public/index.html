@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OBPAZ Chat</title>
+    <title>Olive · OBPAZ Chat</title>
+    <link rel="icon" href="/olive/oliveicon.png" />
     <meta name="description" content="Chatbot educativo sobre cultura de paz para escolas." />
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -11,13 +12,9 @@
     <main class="app-shell">
       <section class="chat-panel" aria-label="OBPAZ Chat">
         <header class="topbar">
-          <div class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M20.8 5.2c-2.9.2-5.2 1.1-7 2.8l-1.2 1.1-2.1-2.4a4.8 4.8 0 0 0-5.4-1.3l3.4 4.9-5.7 1.2 5.1 2.7a6.2 6.2 0 0 0 5.8-.1l1.1-.6-.7 4.9 2.7-1.9a5.2 5.2 0 0 0 2.1-4.8l-.3-2 3.4-3.4c.6-.6.1-1.2-1.2-1.1ZM7.2 17.4c1.8.4 3.4.3 4.9-.4-1.1 1.5-2.8 2.3-5.2 2.5a.7.7 0 0 1-.5-1.2l.8-.9Z" />
-            </svg>
-          </div>
+          <div class="brand-mark" aria-hidden="true"><img src="/olive/oliveicon.png" alt="" /></div>
           <div class="title-block">
-            <h1>OBPAZ Chat</h1>
+            <h1>Olive · OBPAZ</h1>
             <p id="status">Carregando serviço</p>
           </div>
           <button type="button" class="profile-pill" id="profileButton" title="Trocar quem está conversando">Perfil</button>
@@ -37,6 +34,10 @@
         </form>
       </section>
     </main>
+    <aside class="olive-guide" id="oliveGuide" aria-live="polite">
+      <div class="olive-bubble" id="oliveBubble">Oi! Eu sou a Olive. Vamos conversar sobre paz?</div>
+      <img src="/olive/olivebodynoback.png" alt="Olive, a guia do OBPAZ" />
+    </aside>
     <script src="/illustrations.js"></script>
     <script src="/app.js"></script>
   </body>
