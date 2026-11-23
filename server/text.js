@@ -30,6 +30,7 @@ export function stem(token) {
     [/soes$/, "s"],
     [/sao$/, "s"],
     [/mente$/, ""],
+    [/(dor|dora|dores|doras)$/, ""], // coordenador -> coorden(a), educador -> educa
     [/idades?$/, "idad"],
     [/encias?$/, "enc"],
     [/ancias?$/, "anc"],

@@ -52,6 +52,19 @@ npm run dev
 
 Abra `http://localhost:3000`.
 
+## Base ampliada (NEP/UEPG + fontes confiáveis)
+
+`node scripts/build-web-knowledge.mjs` gera a pasta `conhecimento-web/` com:
+
+- **Site oficial do NEP/UEPG** (https://www2.uepg.br/nep/): páginas, notícias e documentos PDF — prioridade máxima na busca;
+- **Wikipédia em português**: artigos selecionados sobre paz, direitos humanos, bullying, mediação, CNV etc.;
+- leis do Planalto (quando o site estiver acessível).
+
+Quando a base não cobre a pergunta, a Olive consulta **ao vivo a Wikipédia em português** (`LIVE_WIKIPEDIA=0` desliga),
+enviando apenas termos de busca (nunca a mensagem inteira). Todo texto externo passa pelo **filtro de conteúdo**
+(`server/contentFilter.js`), que também bloqueia pedidos impróprios (pornografia, drogas, armas, métodos de suicídio, apostas).
+As respostas para adolescentes e adultos mostram os links das fontes.
+
 ## Como adicionar conteúdo
 
 Coloque arquivos `.pdf`, `.docx`, `.md` ou `.txt` dentro da pasta `OBPAZ - Banco de Dados`.

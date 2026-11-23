@@ -1,0 +1,20 @@
+---
+title: Wikipédia - Comunicação não violenta
+url: https://pt.wikipedia.org/wiki/Comunica%C3%A7%C3%A3o_n%C3%A3o_violenta
+source: Wikipédia (pt)
+priority: 1
+---
+
+Comunicação não violenta
+
+A comunicação não violenta (CNV; também conhecida como comunicação compassiva) é um processo de pesquisa contínua desenvolvido por Marshall Bertram Rosenberg e uma equipe internacional de colegas, que apoia o estabelecimento de relações de parceria e cooperação, em que predomina comunicação eficaz e com empatia. Enfatiza a importância de determinar ações à base de valores comuns.
+
+Características: A CNV enxerga uma continuidade entre as esferas pessoal, interpessoal e social, e proporciona formas práticas de intervir nelas. Uma comunicação à base destas distinções tende a evitar dinâmicas classificatórias, dominatórias e desresponsabilizantes, que rotulem ou enquadrem os interlocutores ou terceiros. Quando usada como guia na construção de acordos, a CNV pode tomar a forma de uma série de distinções, entre as quais:
+
+Distinção entre observações e juízos de valor; Distinção entre sentimentos e opiniões; Distinção entre necessidades (ou valores universais) e estratégias; Distinção entre pedidos e exigências/ameaças. Uma comunicação à base destas distinções tende a evitar dinâmicas classificatórias, dominatórias e desresponsabilizantes, que rotulem ou enquadrem os interlocutores ou terceiros. Aqueles que se apoiam na comunicação não violenta consideram que todas as ações são originadas numa tentativa de satisfazer necessidades humanas, mas tentam fazê-lo evitando o uso do medo, da vergonha, da acusação, da ideia de falha, da coerção ou das ameaças. Um princípio-chave da comunicação não violenta é a capacidade de se expressar sem usar julgamentos de "bem" ou "mal", do que está certo ou errado. A ênfase é posta em expressar sentimentos e necessidades, em vez de críticas ou juízos de valor. Rosenberg escolheu a comunicação conhecida como "não violenta" para se aproximar da filosofia de Mohandas Gandhi do ahimsa (ou não violência). Não obstante, ao contrário de Gandhi, Rosenberg aprovava o uso defensivo da força - para evitar ferimentos, mas não com sentido punitivo (ou seja, com a intenção punir ou machucar alguém). Rosenberg afirma que esse desejo de punir e o uso de medidas punitivas existem somente nas culturas que têm visões moralistas do mundo, que usam as categorias de bom e mau. Ele diz que os antropólogos descrevem culturas em muitas partes do mundo em que a ideia de que alguém é "mau" não faz nenhum sentido, e que tais culturas tendem a ser pacíficas.
+
+Utilização: Rosenberg, psicólogo clínico de formação, aplicou o modelo de comunicação não violenta em programas da paz em Ruanda, Burundi, Nigéria, Malásia, Indonésia, Sri Lanka, Oriente Médio, Sérvia, Croácia e Irlanda. As contribuições teóricas e práticas de Rosenberg são amplamente utilizadas nas áreas de mediação e definição dos conflitos e são usadas por alguns mediadores em seu trabalho.
+
+Pedagogia: A punição no processo educativo é desnecessária, porque desvia o foco da ação em si para as consequências negativas da punição. Assim, a criança não consegue se dedicar aos atos que trarão consequências positivas. Da mesma forma, a recompensa também não é útil, pois cria um desequilíbrio de poder entre duas partes. É preciso que o poder seja construído a partir do respeito e da confiança entre as partes, compartilhando os propósitos e os motivos das atitudes discutidas, para que ambas queiram realizá-las.
+
+Ambiente corporativo: No contexto da gestão de operações e logística de alta performance, a aplicação da Comunicação Não Violenta (CNV) atua como um mecanismo de liderança preventiva. Ao substituir o modelo de comando-e-controle puramente reativo pela escuta ativa e pela clareza nas necessidades operacionais, as organizações observam uma redução direta no retrabalho e no turnover. A prática minimiza a 'ansiedade operacional', promovendo a fluidez dos processos e a segurança psicológica das equipes, transformando a gestão de conflitos em uma ferramenta de otimização de fluxo.

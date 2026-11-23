@@ -213,7 +213,13 @@ function addAssistantMessage(data) {
   const ask = data.question ? `<div class="callout ask"><span aria-hidden="true">🤔</span><div>${escapeHtml(data.question)}</div></div>` : "";
   const sources = data.sources?.length
     ? `<details class="sources"><summary>Base desta resposta (${data.sources.length})</summary><ul>${data.sources
-        .map((source) => `<li>${escapeHtml(source.title)}</li>`)
+        .map((source) => {
+          const title = escapeHtml(source.title);
+          const origin = source.origin ? ` <small>· ${escapeHtml(source.origin)}</small>` : "";
+          // Só links http(s) viram âncora (evita "javascript:" vindo de fora).
+          const safeUrl = /^https?:\/\//i.test(source.url || "") ? escapeHtml(source.url) : "";
+          return `<li>${safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${title}</a>` : title}${origin}</li>`;
+        })
         .join("")}</ul></details>`
     : "";
   const speakText = [data.answer, data.story?.title, ...(data.story?.panels || []).map((p) => p.caption), data.tip ? `Dica: ${data.tip}` : "", data.question]

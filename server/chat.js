@@ -9,14 +9,16 @@ import { detectRisk, riskResponse } from "./safety.js";
 import { KID_ENTRIES, SCENES } from "./kidContent.js";
 import { REWRITE_SCHEMA, rewriteMessages, answerMessages, answerSchema, SCOPE_TOPICS } from "./prompts.js";
 import { normalize, splitSentences, tokenize } from "./text.js";
+import { searchWikipedia } from "./webSearch.js";
+import { checkUserMessage, BLOCKED_RESPONSE } from "./contentFilter.js";
 
 const GREETING = /^(oi+|ola|ol[aá]|oie|eai|e ai|bom dia|boa tarde|boa noite|tudo bem|hello|hi|obrigad[oa]|valeu|tchau)\b/;
 
 const FIXED = {
   greeting: {
-    crianca: "Oi! 😊 Eu sou o OBPAZ, um amigo que adora conversar sobre paz, amizade e como resolver brigas sem machucar ninguém. Sobre o que você quer conversar?",
-    adolescente: "Oi! Sou o OBPAZ. Posso conversar sobre conflitos, respeito, bullying, emoções, direitos humanos e cultura de paz. O que você quer saber?",
-    adulto: "Olá! Sou o OBPAZ, assistente sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Como posso ajudar?"
+    crianca: "Oi! 😊 Eu sou a Olive, uma amiga que adora conversar sobre paz, amizade e como resolver brigas sem machucar ninguém. Sobre o que você quer conversar?",
+    adolescente: "Oi! Sou a Olive, do NEP/UEPG. Posso conversar sobre conflitos, respeito, bullying, emoções, direitos humanos e cultura de paz. O que você quer saber?",
+    adulto: "Olá! Sou a Olive, assistente do NEP/UEPG sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Como posso ajudar?"
   },
   outOfScope: {
     crianca: "Hmm, sobre isso eu não sei falar. 🙈 Eu sou especialista em paz, amizade, sentimentos e em como resolver brigas. Quer me perguntar algo sobre isso? Por exemplo: \"Como fazer as pazes com um amigo?\"",
@@ -46,6 +48,15 @@ function compactHistory(history = []) {
     .map((item) => ({ role: item.role, content: String(item.content).slice(0, 700) }));
 }
 
+// Palavras-chave de uma mensagem (sem palavras comuns), para buscas externas.
+function keywordQuery(message) {
+  return normalize(message)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length > 3 && tokenize(word).length)
+    .slice(0, 6)
+    .join(" ");
+}
+
 // Troca espaços/hífens "especiais" que alguns modelos usam por caracteres comuns.
 function cleanText(value) {
   return String(value || "")
@@ -61,7 +72,8 @@ function faqAnswerText(chunk) {
 function uniqueSources(passages) {
   const seen = new Map();
   passages.forEach((passage) => {
-    if (!seen.has(passage.source.file)) seen.set(passage.source.file, { title: passage.source.title });
+    const key = passage.source.url || passage.source.file;
+    if (!seen.has(key)) seen.set(key, { title: passage.source.title, url: passage.source.url || null, origin: passage.source.origin || null });
   });
   return [...seen.values()];
 }
@@ -285,6 +297,11 @@ export async function createChatService() {
     const ruleRisk = detectRisk(message);
     if (ruleRisk) return { ...meta, kind: "risk", grounded: true, answer: riskResponse(ruleRisk, audience), sources: [] };
 
+    // 1b) Filtro de conteúdo: pedidos impróprios (pornografia, drogas, armas...) recebem resposta fixa.
+    if (checkUserMessage(message) === "blocked") {
+      return { ...meta, kind: "blocked", grounded: true, answer: BLOCKED_RESPONSE[audience], sources: [] };
+    }
+
     // 2) Saudações curtas.
     if (GREETING.test(normalized) && normalized.length < 30) {
       return { ...meta, kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [] };
@@ -303,8 +320,21 @@ export async function createChatService() {
 
     if (!llm) return finish(await localAnswer({ message, audience, search }));
 
-    // Para crianças, o conteúdo infantil curado entra como trecho extra (fatos + exemplo de linguagem).
     const passages = [...search.results];
+
+    // Base fraca para esta pergunta: complementa com a Wikipédia em português (filtrada),
+    // usando só os termos de busca — nunca a mensagem inteira.
+    if (config.liveWikipedia && search.topCoverage < 0.6) {
+      const terms = rewritten?.search_queries?.[0] || keywordQuery(message);
+      try {
+        const web = await searchWikipedia(terms, 2);
+        passages.splice(Math.min(passages.length, 4), passages.length, ...web);
+      } catch (error) {
+        console.warn("Busca na Wikipédia indisponível:", error.message);
+      }
+    }
+
+    // Para crianças, o conteúdo infantil curado entra como trecho extra (fatos + exemplo de linguagem).
     let kidEntry = null;
     if (audience === "crianca") {
       kidEntry = await findKidEntry(queries);
@@ -342,7 +372,7 @@ export async function createChatService() {
     if (result.intent === "fora_do_escopo") {
       return finish({ kind: "out_of_scope", grounded: true, answer: FIXED.outOfScope[audience], sources: [], model: result.model });
     }
-    if (result.intent === "saudacao" && !result.grounded) {
+    if (result.intent === "saudacao" && !result.grounded && normalized.length < 25) {
       return finish({ kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [], model: result.model });
     }
     if (!result.answer) return finish({ ...(await localAnswer({ message, audience, search })), mode: "local" });

@@ -1,0 +1,40 @@
+---
+title: Wikipédia - Paz
+url: https://pt.wikipedia.org/wiki/Paz
+source: Wikipédia (pt)
+priority: 1
+---
+
+Paz
+
+A Paz (do latim: Pax) é geralmente definida como um estado de calma ou tranquilidade, uma ausência de perturbações e agitação. Derivada do latim Pacem = Absentia Belli, pode referir-se à ausência de violência ou guerra. Neste sentido, a paz entre nações e dentro delas é o objetivo assumido de muitas organizações, designadamente a ONU. No plano pessoal, paz designa um estado de espírito isento de ira, de desconfiança e - de um modo geral - de todos os sentimentos negativos. Assim, ela é desejada por cada pessoa para si próprio e, eventualmente, para os outros, ao ponto de se ter tornado uma frequente saudação (que a paz esteja contigo) e um objetivo de vida. A paz é mundialmente representada pelo pombo e pela bandeira branca. Paz também é um estado de espírito, onde o ser se encontra equilibrado e sereno, com isso, encontrando a sua total paz interior.
+
+Tipos de paz: Paz Eterna: conceito elaborado pelo filósofo Immanuel Kant, inspirado nos ideais da Revolução Francesa. Designa um estado de paz mundial, obtido através de uma "república" única, capaz de representar as aspirações naturalmente pacíficas de todos os povos e indivíduos. Como o próprio filósofo esclarece, o termo é derivado de uma piada, onde a inscrição "Paz Eterna" é usada como legenda na ilustração de um túmulo. Paz pela Lei: lema da Organização do Tratado do Atlântico Norte, baseia-se na ideia de Kant e sugere que a paz deva ser obtida através de legislação em assuntos internacionais, capaz de regulamentar as relações diplomáticas, os conflitos de interesse, etc. Paz pela força: obtida quando um indivíduo, instituição ou Estado é fortalecido de tal forma, que toda tentativa de subversão do status quo é desestimulada. Em inglês original, peace through strength.
+
+Prêmio Nobel da Paz:
+
+O Prêmio Nobel da Paz é atribuído anualmente a pessoas que se evidenciaram pelo seu contributo para o fim de períodos prolongados de violência, conflito ou opressão através do seu empenho e liderança moral. No entanto, algumas controversas atribuições deste prêmio contemplaram antigos guerrilheiros e supostos terroristas que se acredita terem ajudado ao fim de situações similares fazendo concessões excepcionais no sentido da pacificação. Eis alguns laureados com o Prêmio Nobel da Paz cuja atribuição ainda hoje suscita alguma controvérsia na sociedade:
+
+Rev. Martin Luther King, Jr. (laureado em 1964); Henry Kissinger (laureado em 1973); Madre Teresa de Calcutá (laureada em 1979); Nelson Mandela e o antigo presidente Frederik Willem de Klerk (laureados em conjunto em 1993); Yasser Arafat, Yitzhak Rabin e Shimon Peres (laureados em 1994); David Trimble (laureado em 1998).
+
+Teorias:
+
+Muitas diferentes teorias de "paz" existem no mundo da polemologia, que envolve o estudo da transformação dos conflitos, desarmamento e cessação de violência. A definição de paz pode variar de acordo com a religião, cultura ou matéria de estudo. A paz é um estado de equilíbrio e entendimento em si mesmo e entre outros, onde o respeito é adquirido pela aceitação das diferenças, tolerância, os conflitos são resolvidos através do diálogo, os direitos das pessoas são respeitados e suas vozes são ouvidas, e todos estão em seu ponto mais alto de serenidade sem tensão social.
+
+Teoria dos Jogos:
+
+O jogo de guerra e paz é uma abordagem de teoria dos jogos em relação à paz e resolução de conflitos. Um jogo iterado originalmente tocado em grupos de acadêmicos e por modelagem computacional por muitos anos a fim de estudar possíveis estratégias de cooperação e agressão. Como os peace makers tornaram-se mais ricos ao longo do tempo, tornou-se claro que fazer a guerra tinha custos mais altos do que inicialmente previsto. A única estratégia que acumulava riqueza mais rapidamente era a "Genghis Khan", um agressor constante fazendo a guerra continuamente para ganhar recursos. Isto levou ao desenvolvimento da estratégia "cara agradável provocante", um pacificador até ser atacado, desenvolvido apenas para ganhar através de perdões ocasionais, mesmo quando atacado. Vários jogadores continuam a ganhar riqueza cooperando uns com os outros, enquanto prejudicam o agressor constante. Tais ações levaram, em essência, para o desenvolvimento da Liga Hanseática que visava ao comércio e defesa mútua depois de séculos de depredação viquingue.
+
+Teoria da paz democrática:
+
+A teoria da paz democrática afirma que as democracias nunca entrarão em guerra umas com as outras.
+
+Teoria da paz ativa: A partir dos ensinamentos de Johan Galtung, norueguês cofundador do campo da polemologia, em 'paz positiva', e dos escritos de Maine Quaker Gray Cox, um consórcio de pesquisadores e disputantes na iniciativa experimental da Faculdade John Woolman chegaram a uma teoria da paz ativa. Esta teoria postula que a paz faz parte de uma tríade, que inclui também a justiça e a totalidade (ou bem-estar), em consonância com interpretações acadêmicas escritas do significado da palavra hebraica antiga S-L-M, ou "Shalom", chamado por alguns de a palavra da Bíblia para salvação, a justiça e a paz. Além disso, o consórcio integrou o ensino de Galtung dos significados dos termos da paz, manutenção da paz e construção da paz, para também se encaixarem em uma formulação triádica. Vermont Quaker John V. Wilmerding, Jr., fundador da John Woolman College, postula cinco estágios de crescimento aplicáveis a indivíduos, comunidades e sociedades, sendo que uma transcende primeiro a consciência da "superfície", que a maioria das pessoas tem, emergindo sucessivamente em aquiescência, pacifismo, resistência passiva, resistência ativa, e finalmente em paz ativa, dedicando-se à pacificação, manutenção da paz, e/ou construção da paz.
+
+Muitas pazes: Seguindo Wolfgang Dietrich, Wolfgang Sützl e os estudos da paz da Universidade de Innsbruck, alguns pensadores abandonaram qualquer definição única e abrangente de paz. Em vez disso, eles promovem a ideia de muitas pazes. Eles argumentam que, como não existe uma definição única ou correta de paz, a paz deve ser entendida como uma pluralidade. Esse entendimento pós-moderno da paz foi baseado na filosofia de Jean-François Lyotard. Ele serviu como base para o conceito mais recente de paz transracional e transformação de conflitos.
+
+Pazes trans-racionais: Em 2008, Wolfgang Dietrich alargou a sua abordagem anterior das muitas pazes às chamadas "cinco famílias" de interpretações da paz: abordagem energética, moral, moderna, pós-moderna e trans-racional. A trans-racionalidade une a compreensão racional e mecanicista da paz moderna em uma maneira relacional e baseada na cultura com narrativas espirituais e interpretações energéticas. A compreensão sistêmica das pazes trans-racionais defende um método de transformação de conflitos centrado no cliente, a abordagem chamada de elicitiva.
+
+Estudos da paz e conflitos:
+
+Os "Estudos da paz e conflitos" são um campo acadêmico que identifica e analisa comportamentos violentos e não violentos, bem como os mecanismos estruturais presentes em conflitos sociais violentos e não violentos. A finalidade dessa disciplina é entender melhor os processos que levam a uma condição humana mais desejável. Uma variação, "Estudos para a Paz" (polemologia), é um esforço interdisciplinar visando à prevenção, deescalação e solução de conflitos. Isto contrasta com os estudos da guerra, dirigidos à consecução eficiente de vitória em conflitos. Disciplinas envolvidas podem incluir ciência política, geografia, economia, psicologia, sociologia, relações internacionais, história, arqueologia, antropologia, estudos religiosos e estudos de gênero, dentre várias outras. O problema da paz é uma questão central no pensamento de gurus como Jiddu Krishnamurti e o Dalai Lama. É também preocupação maior do reputado filósofo e sociólogo francês Edgar Morin, preocupação essa pela primeira vez expressa no seu livro Terre-Patrie (Terra-Pátria, de 1993), “a nossa casa e o nosso jardim”, pondo em destaque implicações globais.

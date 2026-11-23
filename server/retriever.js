@@ -88,7 +88,10 @@ export function createRetriever({ chunks, vectors, provider }) {
       }
     }
 
+    // Peso por fonte: site oficial do NEP (3) > material OBPAZ (2) > Wikipédia (1).
+    const weight = (index) => ({ 3: 1.1, 2: 1, 1: 0.85 })[chunks[index].source.priority ?? 2] ?? 1;
     const results = [...fused.entries()]
+      .map(([index, score]) => [index, score * weight(index)])
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
       .map(([index, fusedScore]) => ({ ...chunks[index], fusedScore, ...best.get(index) }));

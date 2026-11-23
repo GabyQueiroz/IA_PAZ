@@ -31,6 +31,9 @@ export const config = {
   port: num(process.env.PORT, 3000),
   dataDir: process.env.DATA_DIR || "./OBPAZ - Banco de Dados-20260417T222334Z-3-001/OBPAZ - Banco de Dados",
   cacheDir: process.env.CACHE_DIR || "./.cache",
+  webDataDir: process.env.WEB_DATA_DIR || "./conhecimento-web",
+  // Busca ao vivo na Wikipédia (pt) quando a base não tem a resposta. 0 para desligar.
+  liveWikipedia: bool(process.env.LIVE_WIKIPEDIA, true),
 
   // Qualquer API compatível com OpenAI (padrão: Groq, gratuita). Sem chave → modo básico.
   llmApiKey: llmKey,
