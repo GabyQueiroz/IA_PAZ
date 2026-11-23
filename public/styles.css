@@ -787,3 +787,62 @@ body[data-audience="crianca"] .profile-pill {
 @media (max-width: 720px) {
   .olive-guide { width: 64px; bottom: 140px; opacity: 0.95; }
 }
+
+/* ---------- Recepção: botões rápidos e desenho ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chip {
+  padding: 8px 13px;
+  border: 2px solid #9fd6c7;
+  border-radius: 999px;
+  color: var(--accent-strong);
+  background: #f2fbf8;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #e2f5ee;
+}
+
+.chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.chip.secondary {
+  border-color: var(--line);
+  color: var(--muted);
+  background: #fff;
+  font-weight: 600;
+}
+
+body[data-audience="crianca"] .chip {
+  border-color: #ffd54f;
+  color: #5d4037;
+  background: #fffaeb;
+  font-size: 1rem;
+}
+
+.intro-picture {
+  max-width: 360px;
+  margin: 12px 0 0;
+  overflow: hidden;
+  border: 3px solid #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(38, 71, 63, 0.14);
+}
+
+.intro-picture .scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}

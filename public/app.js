@@ -229,15 +229,34 @@ function addAssistantMessage(data) {
     ? `<button type="button" class="speak" title="Ouvir a resposta" aria-label="Ouvir a resposta">🔊 Ouvir</button>`
     : "";
 
+  // Desenho único (usado na recepção) e botões de resposta rápida.
+  const picture = data.illustration
+    ? `<figure class="intro-picture">${window.renderIllustration(data.illustration, data.illustrationLabel || "")}</figure>`
+    : "";
+  const chips = data.chips?.length
+    ? `<div class="chips">${data.chips
+        .map((chip, index) => `<button type="button" class="chip ${chip.secondary ? "secondary" : ""}" data-chip="${index}">${escapeHtml(chip.label)}</button>`)
+        .join("")}</div>`
+    : "";
+
   const node = addNode(`
-    <article class="message assistant ${data.kind === "risk" ? "risk" : ""} ${story ? "has-story" : ""}">
+    <article class="message assistant ${data.kind === "risk" ? "risk" : ""} ${story || picture ? "has-story" : ""}">
       <div class="bubble">
         ${formatText(data.answer)}
-        ${story}${tip}${ask}
+        ${picture}${story}${tip}${ask}${chips}
         <div class="message-tools">${speakButton}${sources}</div>
       </div>
     </article>`);
   node.querySelector(".speak")?.addEventListener("click", (event) => speak(speakText, event.currentTarget));
+  node.querySelectorAll("[data-chip]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const chip = data.chips[Number(button.dataset.chip)];
+      node.querySelectorAll("[data-chip]").forEach((b) => (b.disabled = true));
+      if (chip.action) chip.action();
+      else sendMessage(chip.label);
+    })
+  );
+  return node;
 }
 
 function addNotice(text, actionLabel, onAction) {
@@ -270,12 +289,129 @@ function showProfilePicker() {
       saveProfile(chosen);
       node.remove();
       setAudience(chosen === "auto" ? audience : chosen);
-      addAssistantMessage({
-        answer: chosen === "auto" ? "Combinado! Pode perguntar à vontade: eu vou adaptar o jeito de explicar para você. 😊" : GREETINGS[audience]
-      });
+      if (chosen === "auto") {
+        addAssistantMessage({ answer: "Combinado! Pode perguntar à vontade: eu vou adaptar o jeito de explicar para você. 😊" });
+      } else {
+        startConversation();
+      }
       inputEl.focus();
     })
   );
+}
+
+// ---------- Recepção: nome + introdução à paz (criança e adolescente) ----------
+// O nome fica SÓ neste aparelho (localStorage): não vai para o servidor nem para a IA.
+const NAME_KEY = "obpaz.name";
+let userName = "";
+try {
+  userName = localStorage.getItem(NAME_KEY) || "";
+} catch {
+  userName = "";
+}
+let awaitingName = false;
+
+function saveName(value) {
+  userName = value || "";
+  try {
+    if (userName) localStorage.setItem(NAME_KEY, userName);
+    else localStorage.removeItem(NAME_KEY);
+  } catch {
+    /* sem armazenamento */
+  }
+}
+
+// "Ana", "meu nome é Ana", "me chamo João Pedro", "sou a Bia" -> nome. Perguntas e frases longas -> null.
+function extractName(text) {
+  const clean = String(text).trim().replace(/[.!…\s\p{Extended_Pictographic}]+$/u, "");
+  if (!clean || clean.includes("?")) return null;
+  const match = clean.match(
+    /^(?:(?:oi|olá|ola|oie)[,!]?\s+)?(?:(?:o\s+)?meu nome (?:é|e)|me chamo|eu me chamo|eu sou (?:o|a)|sou (?:o|a)|pode me chamar de|eu sou)\s+(.+)$/iu
+  );
+  const candidate = (match ? match[1] : clean).trim();
+  const words = candidate.split(/\s+/);
+  if (words.length > 2 || !/^[\p{L}' -]{2,24}$/u.test(candidate)) return null;
+  if (/^(oi+|olá|ola|oie|não|nao|sim|pular|tchau|obrigad[oa]|valeu|bom dia|boa tarde|boa noite|paz|bullying|raiva|briga|nada|ninguém|ninguem)$/i.test(candidate)) {
+    return null;
+  }
+  return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
+}
+
+const WELCOME = {
+  crianca: {
+    ask: "Oi! 😊 Eu sou a Olive, a guia do NEP. Antes da gente conversar... qual é o seu nome?",
+    hello: (name) => (name ? `Que nome lindo, ${name}! 💛 Que bom te conhecer.` : "Tudo bem! 💛 Que bom te conhecer."),
+    intro:
+      "Vou te contar um segredo: **paz** é quando a gente convive com respeito, cuida uns dos outros e resolve as brigas conversando, sem machucar ninguém. Dá pra fazer paz na escola, em casa e com os amigos — todo dia! 🕊️",
+    invite:
+      "Você pode me perguntar sobre amizade, sentimentos (como raiva ou tristeza), brigas, bullying e respeito às diferenças. Eu explico com historinhas e desenhos! Por onde a gente começa?",
+    chips: ["O que é paz?", "Como fazer as pazes com meu amigo?", "Estou com raiva, o que eu faço?", "O que é bullying?"],
+    back: (name) => `Oi de novo, ${name}! 😊 Que bom que você voltou. Sobre o que vamos conversar hoje?`,
+    placeholder: "Escreva seu nome aqui... 😊"
+  },
+  adolescente: {
+    ask: "E aí! Eu sou a Olive, do NEP/UEPG. Como você quer que eu te chame? (se preferir, é só pular)",
+    hello: (name) => (name ? `Prazer, ${name}!` : "Tranquilo, sem problema!"),
+    intro:
+      "Rapidinho: **paz** não é só não ter briga. É conviver com respeito, justiça e diálogo — na escola, em casa e nas redes sociais. Conflitos sempre vão existir; o que faz diferença é como a gente lida com eles.",
+    invite:
+      "Pode me perguntar sobre conflitos com amigos, bullying e cyberbullying, emoções, preconceito, direitos humanos ou sobre o próprio NEP. Algumas ideias:",
+    chips: ["Estou sofrendo bullying, o que faço?", "Como controlar a raiva numa discussão?", "O que é preconceito?", "O que é o NEP da UEPG?"],
+    back: (name) => `E aí, ${name}! Bom te ver de novo. O que você quer saber hoje?`,
+    placeholder: "Escreva como quer ser chamado(a)..."
+  }
+};
+
+function askName() {
+  const texts = WELCOME[audience];
+  if (!texts) return;
+  awaitingName = true;
+  inputEl.placeholder = texts.placeholder;
+  addAssistantMessage({
+    answer: texts.ask,
+    chips: [{ label: "Pular", secondary: true, action: () => finishWelcome("") }]
+  });
+  oliveSays(audience === "crianca" ? "Oi! Qual é o seu nome? 😊" : "E aí! Como posso te chamar?", 8000);
+  inputEl.focus();
+}
+
+function finishWelcome(name) {
+  const texts = WELCOME[audience];
+  awaitingName = false;
+  inputEl.placeholder = PROFILES[audience].placeholder;
+  saveName(name);
+  if (!texts) return;
+  addAssistantMessage({
+    answer: `${texts.hello(name)}\n\n${texts.intro}\n\n${texts.invite}`,
+    illustration: audience === "crianca" ? "pomba_paz" : null,
+    illustrationLabel: "Pomba da paz voando sobre um arco-íris",
+    chips: texts.chips.map((label) => ({ label }))
+  });
+  oliveCheer();
+  if (name) oliveSays(audience === "crianca" ? `Oba, ${name}! Vamos conversar! 🎉` : `Bora, ${name}!`, 6000);
+  inputEl.focus();
+}
+
+function welcomeBack() {
+  const texts = WELCOME[audience];
+  addAssistantMessage({
+    answer: texts.back(userName),
+    chips: [
+      ...texts.chips.slice(0, 3).map((label) => ({ label })),
+      // Computador compartilhado na escola: outra pessoa pode estar usando.
+      { label: "Sou outra pessoa", secondary: true, action: () => { saveName(""); askName(); } }
+    ]
+  });
+  oliveSays(`Oi, ${userName}! 💛`, 6000);
+}
+
+/** Começo da conversa conforme o público. */
+function startConversation() {
+  if (WELCOME[audience] && (profile === "crianca" || profile === "adolescente")) {
+    if (userName) welcomeBack();
+    else askName();
+  } else {
+    addAssistantMessage({ answer: GREETINGS[audience] });
+  }
 }
 
 // ---------- Público / tema ----------
@@ -356,6 +492,19 @@ async function sendMessage(rawText) {
   }
 
   inputEl.value = "";
+
+  // Esperando o nome: se parecer um nome, a Olive se apresenta; se for uma pergunta, segue a conversa normal.
+  if (awaitingName) {
+    const name = extractName(text);
+    awaitingName = false;
+    inputEl.placeholder = PROFILES[audience].placeholder;
+    if (name) {
+      addUserMessage(text);
+      finishWelcome(name);
+      return;
+    }
+  }
+
   addUserMessage(text);
   setLoading(true);
 
@@ -375,7 +524,7 @@ async function sendMessage(rawText) {
     handleAudienceChange(data);
     addAssistantMessage(data);
     oliveCheer();
-    if (data.story) oliveSays("Olha a historinha que eu preparei! 📖");
+    if (data.story) oliveSays(userName ? `Olha a historinha que eu preparei, ${userName}! 📖` : "Olha a historinha que eu preparei! 📖");
     else if (data.kind === "risk") oliveSays("Estou aqui com você. Procure um adulto de confiança. 💛", 9000);
     history.push({ role: "user", content: text }, { role: "assistant", content: data.answer });
   } catch (error) {
@@ -414,8 +563,8 @@ fetch("/api/health")
 setAudience(audience);
 sendButton.disabled = true;
 if (!profile) {
-  addAssistantMessage({ answer: "Olá! Eu sou a Olive, a guia do OBPAZ. Converso sobre paz, convivência e direitos humanos. 🕊️" });
+  addAssistantMessage({ answer: "Olá! 🕊️ Antes de começar, me conta: quem está conversando comigo?" });
   showProfilePicker();
 } else {
-  addAssistantMessage({ answer: GREETINGS[audience] });
+  startConversation();
 }
