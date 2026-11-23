@@ -335,7 +335,8 @@ export async function createChatService() {
     if (result.risk) return finish({ kind: "risk", grounded: true, answer: riskResponse(result.risk, audience), sources: [], model: result.model });
     // Pergunta sobre o tema, mas com um fato que não está na base (ex.: "Galtung ganhou o Nobel?"):
     // é "não sei", não "fora do escopo".
-    if (result.intent === "fora_do_escopo" && search.topCoverage >= 0.5) {
+    const mentionsScope = /\b(paz|galtung|herrera|conflit\w*|violen\w*|bullying|direitos humanos|media[cç]\w*|briga\w*|raiva|respeito|inclus\w*|exclus\w*|suleada|interpaz|obpaz)\b/.test(normalized);
+    if (result.intent === "fora_do_escopo" && (mentionsScope || search.topCoverage >= 0.5)) {
       return finish({ kind: "not_found", grounded: false, answer: FIXED.notFound[audience], sources: [], model: result.model });
     }
     if (result.intent === "fora_do_escopo") {
