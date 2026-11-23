@@ -76,7 +76,8 @@ Para FAQs, use Markdown com uma pergunta por título `##`: cada pergunta vira um
 
 ### Render (plano Free) — em uso
 
-1. O serviço `IA_PAZ` no Render está ligado ao repositório GitHub (branch `main`): cada push publica sozinho.
+1. O serviço `IA_PAZ` no Render está ligado ao repositório GitHub (branch `main`): cada push publica sozinho
+   (o app "Render" no GitHub precisa ter acesso ao repositório `IA_PAZ` em Settings → Applications → Render).
 2. Em **Environment**, configure `GROQ_API_KEY` (chave gratuita da Groq).
 3. O plano grátis tem 512 MB de memória: lá o servidor detecta o Render e usa busca por palavras (BM25 + gírias)
    com reescrita da pergunta pela IA, sem carregar o modelo local de embeddings (que precisaria de ~580 MB).
