@@ -1,0 +1,7 @@
+node_modules
+.cache
+.env
+.git
+.github
+Cronograma_IA.pdf
+npm-debug.log*

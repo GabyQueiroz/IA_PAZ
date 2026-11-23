@@ -7,7 +7,12 @@
     "dev": "nodemon server/index.js",
     "server:dev": "nodemon server/index.js",
     "build": "node -e \"console.log('Frontend estatico pronto em public/')\"",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "eval:search": "node scripts/eval-retrieval.mjs",
+    "eval:answers": "node scripts/eval-answers.mjs"
+  },
+  "optionalDependencies": {
+    "@huggingface/transformers": "^3.8.1"
   },
   "dependencies": {
     "cors": "^2.8.5",

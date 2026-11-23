@@ -5,10 +5,14 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 24
-      - key: OPENAI_MODEL
-        value: gpt-4.1-mini
+      - key: GROQ_API_KEY
+        sync: false
+      # Os 512 MB do plano grátis não comportam o modelo local: busca BM25 + reescrita pela IA.
+      - key: EMBEDDING_PROVIDER
+        value: none
       - key: DATA_DIR
         value: ./OBPAZ - Banco de Dados-20260417T222334Z-3-001/OBPAZ - Banco de Dados

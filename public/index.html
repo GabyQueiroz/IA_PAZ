@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OBPAZ Chat</title>
+    <meta name="description" content="Chatbot educativo sobre cultura de paz para escolas." />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -19,7 +20,7 @@
             <h1>OBPAZ Chat</h1>
             <p id="status">Carregando serviço</p>
           </div>
-          <span class="status-pill">Online</span>
+          <button type="button" class="profile-pill" id="profileButton" title="Trocar quem está conversando">Perfil</button>
         </header>
 
         <div class="messages" id="messages" aria-live="polite"></div>
@@ -27,11 +28,7 @@
         <div class="suggestions" id="suggestions" aria-label="Sugestões"></div>
 
         <form class="composer" id="composer">
-          <textarea
-            id="messageInput"
-            placeholder="Pergunte sobre paz, conflitos, direitos humanos..."
-            rows="1"
-          ></textarea>
+          <textarea id="messageInput" placeholder="Pergunte sobre paz, conflitos, direitos humanos..." rows="1" maxlength="1200"></textarea>
           <button type="submit" aria-label="Enviar mensagem" title="Enviar">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3.4 20.4 21 12 3.4 3.6l1.7 6.5 8.8 1.9-8.8 1.9-1.7 6.5Z" />
@@ -40,6 +37,7 @@
         </form>
       </section>
     </main>
+    <script src="/illustrations.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>
