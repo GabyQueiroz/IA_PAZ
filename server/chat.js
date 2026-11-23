@@ -10,6 +10,7 @@ import { KID_ENTRIES, SCENES } from "./kidContent.js";
 import { REWRITE_SCHEMA, rewriteMessages, answerMessages, answerSchema, SCOPE_TOPICS } from "./prompts.js";
 import { normalize, splitSentences, tokenize } from "./text.js";
 import { searchWikipedia } from "./webSearch.js";
+import { searchTrustedSites, trustedLinksCount } from "./trustedSites.js";
 import { checkUserMessage, BLOCKED_RESPONSE } from "./contentFilter.js";
 
 const GREETING = /^(oi+|ola|ol[aá]|oie|eai|e ai|bom dia|boa tarde|boa noite|tudo bem|hello|hi|obrigad[oa]|valeu|tchau)\b/;
@@ -322,15 +323,37 @@ export async function createChatService() {
 
     const passages = [...search.results];
 
-    // Base fraca para esta pergunta: complementa com a Wikipédia em português (filtrada),
-    // usando só os termos de busca — nunca a mensagem inteira.
-    if (config.liveWikipedia && search.topCoverage < 0.6) {
-      const terms = rewritten?.search_queries?.[0] || keywordQuery(message);
+    // Base fraca para esta pergunta: complementa com sites educativos confiáveis (Escola Kids,
+    // Brasil Escola, Instituto Ayrton Senna) e com a Wikipédia em português — tudo filtrado e com link.
+    // Só termos de busca saem do servidor, nunca a mensagem inteira.
+    let usedExternal = false;
+    async function addExternalSources() {
+      usedExternal = true;
+      // As palavras da própria pergunta vêm primeiro (mais precisas); os termos da IA complementam.
+      const keywords = keywordQuery(message);
+      const rewrittenTerms = rewritten?.search_queries || [];
+      const [sites, wiki] = await Promise.allSettled([
+        searchTrustedSites([keywords, ...rewrittenTerms], audience, 2),
+        // Crianças: sem Wikipédia ao vivo (pode trazer temas pesados); ficam com a base curada + Escola Kids.
+        audience === "crianca" ? Promise.resolve([]) : searchWikipedia(keywords || rewrittenTerms[0] || "", 2, tokenize(message))
+      ]);
+      const fromSites = sites.status === "fulfilled" ? sites.value : [];
+      const fromWiki = wiki.status === "fulfilled" ? wiki.value.slice(0, fromSites.length ? 1 : 2) : [];
+      if (sites.status === "rejected") console.warn("Sites educativos indisponíveis:", sites.reason?.message);
+      if (wiki.status === "rejected") console.warn("Busca na Wikipédia indisponível:", wiki.reason?.message);
+      const external = [...fromSites, ...fromWiki];
+      if (external.length) passages.splice(Math.min(passages.length, 3), passages.length, ...external);
+      return external.length > 0;
+    }
+    if (config.liveWikipedia && search.topCoverage < 0.6) await addExternalSources();
+
+    // Crianças: se o Escola Kids tem uma página sobre o assunto, ela entra (texto feito para essa idade).
+    if (audience === "crianca" && !usedExternal) {
       try {
-        const web = await searchWikipedia(terms, 2);
-        passages.splice(Math.min(passages.length, 4), passages.length, ...web);
+        const kids = (await searchTrustedSites([keywordQuery(message)], "crianca", 1)).filter((p) => p.source.origin === "Escola Kids");
+        if (kids.length) passages.splice(Math.min(passages.length, 4), 0, ...kids);
       } catch (error) {
-        console.warn("Busca na Wikipédia indisponível:", error.message);
+        console.warn("Escola Kids indisponível:", error.message);
       }
     }
 
@@ -348,15 +371,16 @@ export async function createChatService() {
     }
 
     let result;
+    if (process.env.DEBUG_RAG) console.log("[rag] cobertura", search.topCoverage.toFixed(2), "externo", usedExternal, passages.map((p) => p.source.title));
+    const answerNow = () =>
+      llmAnswer({ message, question: rewritten?.standalone_question || message, history, passages, audience, kidEntry });
     try {
-      result = await llmAnswer({
-        message,
-        question: rewritten?.standalone_question || message,
-        history,
-        passages,
-        audience,
-        kidEntry
-      });
+      result = await answerNow();
+      // A base parecia ter o assunto, mas a IA não achou a resposta nela: consulta os sites
+      // educativos e a Wikipédia e tenta mais uma vez (só nesses casos, para poupar a cota).
+      if (!result.grounded && !result.risk && result.intent !== "fora_do_escopo" && !usedExternal && config.liveWikipedia) {
+        if (await addExternalSources()) result = await answerNow();
+      }
     } catch (error) {
       console.error("Falha na geração com LLM; usando modo básico:", error.message);
       return finish({ ...(await localAnswer({ message, audience, search })), mode: "local" });
@@ -365,7 +389,10 @@ export async function createChatService() {
     if (result.risk) return finish({ kind: "risk", grounded: true, answer: riskResponse(result.risk, audience), sources: [], model: result.model });
     // Pergunta sobre o tema, mas com um fato que não está na base (ex.: "Galtung ganhou o Nobel?"):
     // é "não sei", não "fora do escopo".
-    const mentionsScope = /\b(paz|galtung|herrera|conflit\w*|violen\w*|bullying|direitos humanos|media[cç]\w*|briga\w*|raiva|respeito|inclus\w*|exclus\w*|suleada|interpaz|obpaz)\b/.test(normalized);
+    const mentionsScope =
+      /\b(paz|galtung|herrera|conflit\w*|violen\w*|bullying|direitos humanos|media[cç]\w*|briga\w*|raiva|respeito|inclus\w*|exclus\w*|suleada|interpaz|obpaz|nep|preconceit\w*|racism\w*|xenofob\w*|discrimina\w*|diversidade|empatia|socioemocion\w*|emoc\w*|cidadania|gandhi|mandela|malala|luther king)\b/.test(normalized);
+    // Tema do projeto que o modelo classificou mal, mas respondeu com base nas fontes: mantém a resposta.
+    if (result.intent === "fora_do_escopo" && mentionsScope && result.grounded && result.answer) return finish(result);
     if (result.intent === "fora_do_escopo" && (mentionsScope || search.topCoverage >= 0.5)) {
       return finish({ kind: "not_found", grounded: false, answer: FIXED.notFound[audience], sources: [], model: result.model });
     }
@@ -387,7 +414,8 @@ export async function createChatService() {
       dataDir: corpus.dataDir,
       ai: llm ? llm.provider : "local",
       models: llm ? llm.models : [],
-      embeddings: provider ? provider.name : "bm25"
+      embeddings: provider ? provider.name : "bm25",
+      trustedLinks: trustedLinksCount
     })
   };
 }

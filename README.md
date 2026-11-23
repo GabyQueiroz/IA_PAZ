@@ -65,6 +65,13 @@ enviando apenas termos de busca (nunca a mensagem inteira). Todo texto externo p
 (`server/contentFilter.js`), que também bloqueia pedidos impróprios (pornografia, drogas, armas, métodos de suicídio, apostas).
 As respostas para adolescentes e adultos mostram os links das fontes.
 
+### Sites educativos (Escola Kids, Brasil Escola, Instituto Ayrton Senna)
+
+`node scripts/build-link-index.mjs` gera `conhecimento-web/indice-links.json`: só **título, resumo curto e link** das páginas
+sobre os temas do projeto (lidas a partir do mapa do site, respeitando o robots.txt). O texto completo **não** é guardado
+(direitos autorais): quando a base não cobre a pergunta, a Olive lê a página na hora, filtra, resume e mostra o link.
+Para crianças, o Escola Kids tem prioridade; para educadores, o Instituto Ayrton Senna.
+
 ## Como adicionar conteúdo
 
 Coloque arquivos `.pdf`, `.docx`, `.md` ou `.txt` dentro da pasta `OBPAZ - Banco de Dados`.

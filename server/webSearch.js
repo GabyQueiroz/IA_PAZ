@@ -3,6 +3,7 @@
 // - Os textos passam pelo filtro de conteúdo antes de chegar à IA.
 // - Gratuito e sem chave (API pública da Wikimedia).
 import { sanitizeExternalText } from "./contentFilter.js";
+import { tokenize } from "./text.js";
 
 const API = "https://pt.wikipedia.org/w/api.php";
 const UA = "OBPAZ-Olive/1.0 (chatbot educativo NEP-UEPG)";
@@ -19,8 +20,8 @@ async function getJson(params) {
  * @param {string} query termos de busca curtos
  * @returns {Promise<Array<{kind:string, content:string, source:object}>>}
  */
-export async function searchWikipedia(query, limit = 2) {
-  const key = query.toLowerCase().trim();
+export async function searchWikipedia(query, limit = 2, requiredTerms = []) {
+  const key = `${query.toLowerCase().trim()}|${requiredTerms.join(",")}`;
   if (!key) return [];
   if (cache.has(key)) return cache.get(key);
 
@@ -51,7 +52,13 @@ export async function searchWikipedia(query, limit = 2) {
         priority: 1
       }
     }))
-    .filter((passage) => passage.content.length > 200);
+    .filter((passage) => passage.content.length > 200)
+    // Relevância: o artigo precisa conter algum termo da pergunta (evita resultados soltos, como um reality show).
+    .filter((passage) => {
+      if (!requiredTerms.length) return true;
+      const tokens = new Set(tokenize(`${passage.source.title} ${passage.content.slice(0, 1500)}`));
+      return requiredTerms.some((term) => tokens.has(term));
+    });
 
   if (cache.size > 300) cache.delete(cache.keys().next().value);
   cache.set(key, passages);

@@ -33,7 +33,7 @@ function rateLimit(req, res, next) {
 app.get("/api/health", async (_req, res) => {
   try {
     const info = (await servicePromise).info();
-    res.json({ ok: true, documents: info.documents.length, chunks: info.chunks, ai: info.ai, models: info.models, embeddings: info.embeddings });
+    res.json({ ok: true, documents: info.documents.length, chunks: info.chunks, ai: info.ai, models: info.models, embeddings: info.embeddings, trustedLinks: info.trustedLinks });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }
