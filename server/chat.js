@@ -63,6 +63,11 @@ function cleanText(value) {
   return String(value || "")
     .replace(/[   ]/g, " ")
     .replace(/[‐‑]/g, "-")
+    // Marcas internas que o modelo às vezes deixa escapar: "Segundo o trecho 1,", "(trecho 2)", "[3]".
+    .replace(/\b(segundo|conforme|de acordo com|como (diz|mostra|indica)) (o |os )?trechos? \d+(\s*(e|,)\s*\d+)*,?\s*/gi, "")
+    .replace(/\s*\((trechos?|fonte)\s*\d+(\s*(e|,)\s*\d+)*\)/gi, "")
+    .replace(/\s*\[\d+(\s*,\s*\d+)*\]/g, "")
+    .replace(/(^|[.!?]\s+)([a-zà-ú])/g, (m, before, letter) => before + letter.toUpperCase())
     .trim();
 }
 
