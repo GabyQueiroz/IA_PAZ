@@ -37,7 +37,7 @@ const FIXED = {
   notFound: {
     crianca: "Essa é uma ótima pergunta, mas eu ainda não sei a resposta. 🤔 Que tal perguntar para sua professora? Eu posso te contar sobre paz, amizade, sentimentos e como resolver brigas!",
     adolescente: "Não tenho essa informação no meu material de estudo, então prefiro não arriscar uma resposta. Posso falar sobre cultura de paz, conflitos, bullying, emoções e direitos humanos.",
-    adulto: "Não encontrei essa informação no material de estudo do OBPAZ e prefiro não responder sem base. Posso ajudar com cultura de paz, paz positiva e negativa, tipos de violência, educação para a paz, Galtung, Herrera Flores e orientações práticas sobre conflitos."
+    adulto: "Não encontrei essa informação no material do NEP/OBPAZ e prefiro não responder sem base. Posso ajudar com cultura de paz, educação para a paz, tipos de violência, Galtung, Herrera Flores, o trabalho do NEP/UEPG e orientações práticas sobre conflitos."
   }
 };
 

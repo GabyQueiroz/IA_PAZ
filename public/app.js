@@ -59,7 +59,7 @@ const SUGGESTIONS = {
 const GREETINGS = {
   crianca: "Oi! 😊 Eu sou a Olive, a guia do OBPAZ. Adoro conversar sobre paz, amizade, sentimentos e como resolver brigas sem machucar ninguém. Pode perguntar o que quiser!",
   adolescente: "Oi! Sou a Olive, do OBPAZ. Posso conversar sobre conflitos, respeito, bullying, emoções, direitos humanos e cultura de paz.",
-  adulto: "Olá! Sou a Olive, assistente do OBPAZ sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Minhas respostas se baseiam no material do OBPAZ/InterPaz-UEPG."
+  adulto: "Olá! Sou a Olive, assistente do OBPAZ sobre cultura de paz, educação para a paz, conflitos e direitos humanos. Minhas respostas se baseiam no material do NEP/UEPG e em fontes confiáveis, sempre com os links."
 };
 
 function readProfile() {

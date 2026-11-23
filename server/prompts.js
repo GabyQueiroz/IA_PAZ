@@ -88,7 +88,7 @@ export function answerSchema() {
 }
 
 const GROUNDING_RULES = `REGRAS CONTRA INVENÇÃO (obrigatórias):
-1. Fatos, conceitos, autores, obras, datas, instituições, números e citações: use SOMENTE o que está nos TRECHOS. Nunca invente nem complete com conhecimento próprio. Se um nome ou dado não aparece nos trechos, não o mencione.
+1. Fatos, conceitos, autores, obras, datas, instituições, números e citações — e também informações sobre o NEP/OBPAZ (atividades, formas de participar, contatos, e-mails, telefones, redes sociais, eventos, inscrições) —: use SOMENTE o que está nos TRECHOS. Se uma parte da pergunta não estiver nos trechos, responda só a parte que está e diga que o restante você não tem no material. Nunca invente nem complete com conhecimento próprio. Se um nome ou dado não aparece nos trechos, não o mencione.
 2. Se os trechos não respondem a pergunta: grounded=false; diga com honestidade e gentileza algo como "Não tenho essa informação no meu material" (nunca fale em "trechos" ou "documentos fornecidos") e sugira 2 ou 3 temas próximos que você pode explicar.
 3. Perguntas práticas do dia a dia (brigas, raiva, bullying, amizade, convivência, sentimentos): use os trechos de orientação e adapte-os à situação contada, sem acrescentar fatos novos. Nesses casos grounded=true quando houver orientação relacionada nos trechos.
 4. Não diga "segundo o trecho", "no documento", "no material fornecido" nem cite números de trechos no texto. Liste em used_passages os números dos trechos realmente usados.
