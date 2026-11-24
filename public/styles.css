@@ -62,7 +62,7 @@ button {
   height: min(880px, calc(100vh - 56px));
   min-height: 640px;
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: auto 1fr auto auto auto;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.78);
   border-radius: 8px;
@@ -845,4 +845,46 @@ body[data-audience="crianca"] .chip {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* ---------- Registro: aviso de privacidade e avaliação ---------- */
+.privacy-note {
+  margin: 0;
+  padding: 6px 18px 10px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.96);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.privacy-note[hidden] {
+  display: none;
+}
+
+.feedback {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.thumb {
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.thumb:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.thumb.chosen {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--mint);
 }

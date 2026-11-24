@@ -72,6 +72,20 @@ sobre os temas do projeto (lidas a partir do mapa do site, respeitando o robots.
 (direitos autorais): quando a base não cobre a pergunta, a Olive lê a página na hora, filtra, resume e mostra o link.
 Para crianças, o Escola Kids tem prioridade; para educadores, o Instituto Ayrton Senna.
 
+## Registro das conversas (log e base de dados)
+
+Com `DATABASE_URL` configurada (PostgreSQL gratuito, ex.: **Neon**), cada pergunta/resposta é salva na tabela `conversas`:
+data, sessão (código aleatório da visita), turno, **público** (criança/adolescente/adulto), perfil escolhido, se o público foi
+detectado e por quê, pergunta, resposta, tipo (respondida, não sabia, risco, bloqueada...), se veio das fontes, modelo,
+fontes, historinha, tempo e avaliação 👍/👎.
+
+**Privacidade (LGPD/ECA):** não salva nome nem IP; telefones, e-mails, CPF, CEP, endereços e nomes digitados são
+trocados por `[telefone]`, `[nome]` etc. antes de salvar. A tela mostra um aviso. Registros com mais de
+`LOG_RETENTION_DAYS` (padrão 730) são apagados. Para uso em **pesquisa**, verifique a necessidade de aprovação no
+Comitê de Ética (CEP) e do consentimento dos responsáveis.
+
+Para exportar: no painel do Neon, *SQL Editor* → `SELECT * FROM conversas ORDER BY criado_em;` → baixar CSV.
+
 ## Como adicionar conteúdo
 
 Coloque arquivos `.pdf`, `.docx`, `.md` ou `.txt` dentro da pasta `OBPAZ - Banco de Dados`.

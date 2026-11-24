@@ -77,6 +77,16 @@ function saveProfile(value) {
   }
 }
 
+// Código aleatório desta visita (não identifica a pessoa); some quando a aba é fechada.
+let sessionId = "";
+try {
+  sessionId = sessionStorage.getItem("obpaz.session") || crypto.randomUUID();
+  sessionStorage.setItem("obpaz.session", sessionId);
+} catch {
+  sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+let turnCount = 0;
+
 let profile = readProfile(); // crianca | adolescente | adulto | auto | null
 let audience = PROFILES[profile] ? profile : "adulto";
 const history = [];
@@ -225,6 +235,7 @@ function addAssistantMessage(data) {
   const speakText = [data.answer, data.story?.title, ...(data.story?.panels || []).map((p) => p.caption), data.tip ? `Dica: ${data.tip}` : "", data.question]
     .filter(Boolean)
     .join(". ");
+  const feedbackButtons = `<span class="feedback" role="group" aria-label="Esta resposta ajudou?"><button type="button" class="thumb" data-rating="1" title="Resposta boa" aria-label="Resposta boa">👍</button><button type="button" class="thumb" data-rating="-1" title="Resposta ruim" aria-label="Resposta ruim">👎</button></span>`;
   const speakButton = canSpeak
     ? `<button type="button" class="speak" title="Ouvir a resposta" aria-label="Ouvir a resposta">🔊 Ouvir</button>`
     : "";
@@ -244,10 +255,23 @@ function addAssistantMessage(data) {
       <div class="bubble">
         ${formatText(data.answer)}
         ${picture}${story}${tip}${ask}${chips}
-        <div class="message-tools">${speakButton}${sources}</div>
+        <div class="message-tools">${speakButton}${data.logId ? feedbackButtons : ""}${sources}</div>
       </div>
     </article>`);
   node.querySelector(".speak")?.addEventListener("click", (event) => speak(speakText, event.currentTarget));
+  node.querySelectorAll("[data-rating]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const rating = Number(button.dataset.rating);
+      node.querySelectorAll("[data-rating]").forEach((b) => b.classList.toggle("chosen", b === button));
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: data.logId, session: sessionId, rating })
+      }).catch(() => {});
+      if (rating > 0) oliveSays(userName ? `Oba, obrigada ${userName}! 💛` : "Oba, obrigada! 💛", 3500);
+      else oliveSays("Obrigada por avisar! Vou aprender com isso. 🌱", 4000);
+    })
+  );
   node.querySelectorAll("[data-chip]").forEach((button) =>
     button.addEventListener("click", () => {
       const chip = data.chips[Number(button.dataset.chip)];
@@ -514,7 +538,7 @@ async function sendMessage(rawText) {
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, history: history.slice(-8), profile: sentProfile })
+      body: JSON.stringify({ message: text, history: history.slice(-8), profile: sentProfile, selectedProfile: profile, session: sessionId, turn: ++turnCount })
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Erro ao conversar com o servidor.");
@@ -554,6 +578,7 @@ fetch("/api/health")
   .then((response) => response.json())
   .then((health) => {
     statusEl.textContent = health.ok ? (health.ai !== "local" ? "Pronto para conversar" : "Pronto · modo básico (sem IA)") : "Serviço indisponível";
+    if (health.logs) document.querySelector("#privacyNote")?.removeAttribute("hidden");
   })
   .catch(() => {
     statusEl.textContent = "Serviço indisponível";

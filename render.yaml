@@ -11,6 +11,8 @@ services:
         value: 24
       - key: GROQ_API_KEY
         sync: false
+      - key: DATABASE_URL
+        sync: false
       # Os 512 MB do plano grátis não comportam o modelo local: busca BM25 + reescrita pela IA.
       - key: EMBEDDING_PROVIDER
         value: none

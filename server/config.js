@@ -63,6 +63,10 @@ export const config = {
   topK: num(process.env.RAG_TOP_K, 5),
   temperature: num(process.env.LLM_TEMPERATURE || process.env.OPENAI_TEMPERATURE, 0.2),
 
+  // Registro anônimo das conversas (PostgreSQL, ex.: Neon gratuito). Vazio = desligado.
+  databaseUrl: process.env.DATABASE_URL || "",
+  logRetentionDays: num(process.env.LOG_RETENTION_DAYS, 730),
+
   showSources: bool(process.env.SHOW_SOURCES, true),
   rateLimitPerMinute: num(process.env.RATE_LIMIT_PER_MINUTE, 20),
   maxMessageChars: num(process.env.MAX_MESSAGE_CHARS, 1200)

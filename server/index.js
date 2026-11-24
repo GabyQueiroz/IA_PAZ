@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 import { createChatService } from "./chat.js";
+import { logExchange, logsEnabled, saveFeedback } from "./logStore.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,7 +34,7 @@ function rateLimit(req, res, next) {
 app.get("/api/health", async (_req, res) => {
   try {
     const info = (await servicePromise).info();
-    res.json({ ok: true, documents: info.documents.length, chunks: info.chunks, ai: info.ai, models: info.models, embeddings: info.embeddings, trustedLinks: info.trustedLinks });
+    res.json({ ok: true, documents: info.documents.length, chunks: info.chunks, ai: info.ai, models: info.models, embeddings: info.embeddings, trustedLinks: info.trustedLinks, logs: logsEnabled() });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }
@@ -55,11 +56,38 @@ app.post("/api/chat", rateLimit, async (req, res) => {
     if (!message) return res.status(400).json({ error: "Envie uma pergunta para o chat." });
 
     const service = await servicePromise;
-    res.json(await service.chat({ message, history, profile }));
+    const started = Date.now();
+    const result = await service.chat({ message, history, profile });
+
+    // Registro anônimo (sem nome, sem IP); não atrasa a resposta se o banco estiver lento.
+    const session = typeof req.body?.session === "string" ? req.body.session.slice(0, 64) : null;
+    const logId = logsEnabled()
+      ? await Promise.race([
+          logExchange({
+            ...result,
+            message,
+            session,
+            turn: Number(req.body?.turn) || null,
+            profile: typeof req.body?.selectedProfile === "string" ? req.body.selectedProfile : profile,
+            latencyMs: Date.now() - started
+          }),
+          new Promise((resolve) => setTimeout(() => resolve(null), 1500))
+        ])
+      : null;
+
+    res.json({ ...result, logId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Não consegui responder agora. Tente novamente em instantes." });
   }
+});
+
+app.post("/api/feedback", rateLimit, async (req, res) => {
+  const id = Number(req.body?.id);
+  const session = typeof req.body?.session === "string" ? req.body.session : "";
+  const rating = Number(req.body?.rating);
+  if (!Number.isInteger(id) || !session || ![1, -1, 0].includes(rating)) return res.status(400).json({ ok: false });
+  res.json({ ok: await saveFeedback(id, session, rating) });
 });
 
 const publicPath = path.resolve(__dirname, "..", "public");
