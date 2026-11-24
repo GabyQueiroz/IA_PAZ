@@ -491,7 +491,8 @@ function setAudience(value) {
 }
 
 function handleAudienceChange(data) {
-  if (!data.audience || data.audience === audience) return;
+  // Só troca o modo quando o servidor PERCEBEU o público (ex.: "tenho 8 anos"); nunca por padrão.
+  if (!data.audience || data.audience === audience || !data.audienceDetected) return;
   const previous = audience;
   setAudience(data.audience);
   if (profile !== "auto") {

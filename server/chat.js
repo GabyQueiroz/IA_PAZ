@@ -23,8 +23,8 @@ const FIXED = {
   },
   outOfScope: {
     crianca: "Hmm, sobre isso eu não sei falar. 🙈 Eu sou especialista em paz, amizade, sentimentos e em como resolver brigas. Quer me perguntar algo sobre isso? Por exemplo: \"Como fazer as pazes com um amigo?\"",
-    adolescente: `Esse assunto foge do que eu sei. Posso ajudar com: ${SCOPE_TOPICS}.`,
-    adulto: `Essa pergunta está fora do meu escopo. Posso ajudar com: ${SCOPE_TOPICS}.`
+    adolescente: "Isso foge um pouco do meu assunto. Eu manjo mesmo é de convivência, conflitos, bullying, emoções e direitos humanos. Quer tentar por aí?",
+    adulto: "Esse tema foge do meu foco. Posso ajudar com cultura de paz, educação para a paz, conflitos, direitos humanos e o trabalho do NEP/UEPG."
   },
   nameReply: {
     crianca: "Que bom te conhecer! 💛 Paz é quando a gente convive com respeito e resolve as brigas conversando. Pode me perguntar sobre amizade, sentimentos, brigas ou bullying que eu explico com historinhas!",
@@ -317,12 +317,17 @@ export async function createChatService() {
     // -> é uma apresentação, não uma pergunta. Nunca busca na internet; o nome não é repetido nem salvo.
     const lastAssistant = [...history].reverse().find((item) => item.role === "assistant")?.content || "";
     const askedName = /qual (é )?o seu nome|como (você quer que eu te chame|posso te chamar)|seu nome\?/i.test(lastAssistant);
-    if (askedName && !message.includes("?") && message.trim().split(/\s+/).length <= 6) {
+    const looksLikeNameReply =
+      !message.includes("?") &&
+      message.trim().split(/\s+/).length <= 6 &&
+      !GREETING.test(normalized) &&
+      !/^(tudo|voce|vc|eu nao|nao|sim|por que|porque|o que|quem|como|quantos|qual)\b/.test(normalized);
+    if (askedName && looksLikeNameReply) {
       return { ...meta, kind: "name_reply", grounded: true, answer: FIXED.nameReply[audience], sources: [] };
     }
 
-    // 2) Saudações curtas.
-    if (GREETING.test(normalized) && normalized.length < 30) {
+    // 2) Saudações curtas (só no modo básico; com IA, a Olive responde de forma natural e variada).
+    if (!llm && GREETING.test(normalized) && normalized.length < 30) {
       return { ...meta, kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [] };
     }
 
@@ -403,7 +408,7 @@ export async function createChatService() {
       result = await answerNow();
       // A base parecia ter o assunto, mas a IA não achou a resposta nela: consulta os sites
       // educativos e a Wikipédia e tenta mais uma vez (só nesses casos, para poupar a cota).
-      if (!result.grounded && !result.risk && result.intent !== "fora_do_escopo" && !usedExternal && config.liveWikipedia) {
+      if (!result.grounded && !result.risk && !["fora_do_escopo", "conversa", "saudacao"].includes(result.intent) && !usedExternal && config.liveWikipedia) {
         if (await addExternalSources()) result = await answerNow();
       }
     } catch (error) {
@@ -418,14 +423,24 @@ export async function createChatService() {
       /\b(paz|galtung|herrera|conflit\w*|violen\w*|bullying|direitos humanos|media[cç]\w*|briga\w*|raiva|respeito|inclus\w*|exclus\w*|suleada|interpaz|obpaz|nep|preconceit\w*|racism\w*|xenofob\w*|discrimina\w*|diversidade|empatia|socioemocion\w*|emoc\w*|cidadania|gandhi|mandela|malala|luther king)\b/.test(normalized);
     // Tema do projeto que o modelo classificou mal, mas respondeu com base nas fontes: mantém a resposta.
     if (result.intent === "fora_do_escopo" && mentionsScope && result.grounded && result.answer) return finish(result);
+    // Conversa social e perguntas sobre a Olive ou sobre a própria conversa: resposta natural, sem fontes.
+    if (["conversa", "saudacao"].includes(result.intent)) {
+      return finish({
+        ...result,
+        kind: "conversation",
+        grounded: true,
+        answer: result.answer || FIXED.greeting[audience],
+        story: audience === "crianca" ? result.story : null,
+        sources: []
+      });
+    }
+    // Respostas curtas do próprio modelo são mais naturais que as frases fixas (que ficam só de reserva).
+    const shortAnswer = result.answer && result.answer.length <= 420 ? result.answer : "";
     if (result.intent === "fora_do_escopo" && (mentionsScope || search.topCoverage >= 0.5)) {
-      return finish({ kind: "not_found", grounded: false, answer: FIXED.notFound[audience], sources: [], model: result.model });
+      return finish({ kind: "not_found", grounded: false, answer: shortAnswer || FIXED.notFound[audience], sources: [], model: result.model });
     }
     if (result.intent === "fora_do_escopo") {
-      return finish({ kind: "out_of_scope", grounded: true, answer: FIXED.outOfScope[audience], sources: [], model: result.model });
-    }
-    if (result.intent === "saudacao" && !result.grounded && normalized.length < 25) {
-      return finish({ kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [], model: result.model });
+      return finish({ kind: "out_of_scope", grounded: true, answer: shortAnswer || FIXED.outOfScope[audience], sources: [], model: result.model });
     }
     if (!result.answer) return finish({ ...(await localAnswer({ message: contextual, audience, search })), mode: "local" });
     return finish(result);
