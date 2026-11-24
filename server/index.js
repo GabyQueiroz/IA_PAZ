@@ -61,7 +61,8 @@ app.post("/api/chat", rateLimit, async (req, res) => {
 
     // Registro anônimo (sem nome, sem IP); não atrasa a resposta se o banco estiver lento.
     const session = typeof req.body?.session === "string" ? req.body.session.slice(0, 64) : null;
-    const logId = logsEnabled()
+    // Sessões de teste (código começando com "teste-") não entram no registro.
+    const logId = logsEnabled() && !String(session || "").startsWith("teste-")
       ? await Promise.race([
           logExchange({
             ...result,
