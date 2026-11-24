@@ -71,7 +71,7 @@ export function redact(text) {
     .replace(/(\+?55\s?)?\(?\d{2}\)?\s?9?\d{4}[-\s]?\d{4}\b/g, "[telefone]")
     .replace(/\b(rua|avenida|av\.|travessa|alameda)\s+[^,.\n]{2,40}(,?\s*(n[ºo°.]?\s*)?\d+)?/gi, "[endereço]")
     // Nome digitado (crianças costumam escrever em minúsculas): "meu nome é ana clara" -> "meu nome é [nome]".
-    .replace(/(meu nome (é|e)|me chamo|eu me chamo|pode me chamar de|eu sou (o|a))\s+[\p{L}]+(\s+(?!e\b|tenho\b|sou\b|estou\b|moro\b)[\p{L}]+)?/giu, "$1 [nome]")
+    .replace(/(meu nome (é|e|�)|me chamo|eu me chamo|pode me chamar de|eu sou (o|a))\s+[\p{L}]+(\s+(?!e\b|tenho\b|sou\b|estou\b|moro\b)[\p{L}]+)?/giu, "$1 [nome]")
     .slice(0, 4000);
 }
 
