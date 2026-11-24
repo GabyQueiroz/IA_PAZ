@@ -26,6 +26,11 @@ const FIXED = {
     adolescente: `Esse assunto foge do que eu sei. Posso ajudar com: ${SCOPE_TOPICS}.`,
     adulto: `Essa pergunta está fora do meu escopo. Posso ajudar com: ${SCOPE_TOPICS}.`
   },
+  nameReply: {
+    crianca: "Que bom te conhecer! 💛 Paz é quando a gente convive com respeito e resolve as brigas conversando. Pode me perguntar sobre amizade, sentimentos, brigas ou bullying que eu explico com historinhas!",
+    adolescente: "Prazer! Pode me perguntar sobre conflitos, bullying, emoções, preconceito, direitos humanos ou sobre o NEP/UEPG.",
+    adulto: "Prazer! Posso ajudar com cultura de paz, educação para a paz, conflitos, direitos humanos e o trabalho do NEP/UEPG."
+  },
   related: {
     crianca: "Não sei exatamente isso, mas sei uma coisa parecida:",
     adolescente: "Não encontrei exatamente isso no meu material, mas isto pode ajudar:",
@@ -308,6 +313,14 @@ export async function createChatService() {
       return { ...meta, kind: "blocked", grounded: true, answer: BLOCKED_RESPONSE[audience], sources: [] };
     }
 
+    // 1c) Contexto: a Olive acabou de perguntar o nome e a resposta é curta ("É a Gaby", "Pedro")
+    // -> é uma apresentação, não uma pergunta. Nunca busca na internet; o nome não é repetido nem salvo.
+    const lastAssistant = [...history].reverse().find((item) => item.role === "assistant")?.content || "";
+    const askedName = /qual (é )?o seu nome|como (você quer que eu te chame|posso te chamar)|seu nome\?/i.test(lastAssistant);
+    if (askedName && !message.includes("?") && message.trim().split(/\s+/).length <= 6) {
+      return { ...meta, kind: "name_reply", grounded: true, answer: FIXED.nameReply[audience], sources: [] };
+    }
+
     // 2) Saudações curtas.
     if (GREETING.test(normalized) && normalized.length < 30) {
       return { ...meta, kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [] };
@@ -315,7 +328,14 @@ export async function createChatService() {
 
     // 3) Busca híbrida com a pergunta original + reescritas (quando há histórico).
     const rewritten = await rewrite(message, history);
-    const queries = [message, rewritten?.standalone_question, ...(rewritten?.search_queries || [])];
+    // Continuação ("e como faço com isso?", "e ele?"): junta a pergunta anterior para não perder o assunto.
+    const lastUser = [...history].reverse().find((item) => item.role === "user" && !item.content.startsWith("("))?.content || "";
+    const isFollowUp =
+      lastUser &&
+      message.trim().split(/\s+/).length <= 12 &&
+      /^(e|mas|entao|e se|como assim|por que|porque)\b|\b(isso|disso|nisso|esse|essa|ele|ela|eles|elas|dele|dela)\b/i.test(normalized);
+    const contextual = isFollowUp ? `${lastUser} ${message}` : message;
+    const queries = [contextual, rewritten?.standalone_question, ...(rewritten?.search_queries || [])];
     const search = await retriever.search(queries, config.topK);
 
     const finish = (result) => ({
@@ -324,7 +344,7 @@ export async function createChatService() {
       sources: config.showSources && audience !== "crianca" ? (result.sources || []).filter((s) => s.title !== "Conteúdo infantil OBPAZ") : []
     });
 
-    if (!llm) return finish(await localAnswer({ message, audience, search }));
+    if (!llm) return finish(await localAnswer({ message: contextual, audience, search }));
 
     const passages = [...search.results];
 
@@ -388,7 +408,7 @@ export async function createChatService() {
       }
     } catch (error) {
       console.error("Falha na geração com LLM; usando modo básico:", error.message);
-      return finish({ ...(await localAnswer({ message, audience, search })), mode: "local" });
+      return finish({ ...(await localAnswer({ message: contextual, audience, search })), mode: "local" });
     }
 
     if (result.risk) return finish({ kind: "risk", grounded: true, answer: riskResponse(result.risk, audience), sources: [], model: result.model });
@@ -407,7 +427,7 @@ export async function createChatService() {
     if (result.intent === "saudacao" && !result.grounded && normalized.length < 25) {
       return finish({ kind: "greeting", grounded: true, answer: FIXED.greeting[audience], sources: [], model: result.model });
     }
-    if (!result.answer) return finish({ ...(await localAnswer({ message, audience, search })), mode: "local" });
+    if (!result.answer) return finish({ ...(await localAnswer({ message: contextual, audience, search })), mode: "local" });
     return finish(result);
   }
 

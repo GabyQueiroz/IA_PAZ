@@ -65,7 +65,8 @@ app.post("/api/chat", rateLimit, async (req, res) => {
       ? await Promise.race([
           logExchange({
             ...result,
-            message,
+            // Resposta ao pedido de nome: o nome nunca vai para o registro.
+            message: result.kind === "name_reply" ? "[nome informado]" : message,
             session,
             turn: Number(req.body?.turn) || null,
             profile: typeof req.body?.selectedProfile === "string" ? req.body.selectedProfile : profile,

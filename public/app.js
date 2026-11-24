@@ -345,18 +345,49 @@ function saveName(value) {
 }
 
 // "Ana", "meu nome é Ana", "me chamo João Pedro", "sou a Bia" -> nome. Perguntas e frases longas -> null.
+// Palavras comuns que nunca são nome ("estou triste", "e aí", "tudo bem"...).
+const NOT_NAME_WORDS = new Set(
+  `oi oie olá ola opa e aí ai eai salve não nao sim ok beleza legal valeu tchau pular nada ninguém ninguem alguém alguem
+   tudo bem mal estou to tô sou é quero queria sei sabe preciso ajuda obrigado obrigada triste feliz bravo brava raiva medo
+   sozinho sozinha chateado chateada paz bullying briga brigas escola amigo amiga amigos professor professora mãe mae pai
+   irmão irmao irmã irma bom boa dia tarde noite meu minha que qual quem como onde porque por o a os as um uma de do da`
+    .split(/\s+/)
+    .filter(Boolean)
+);
+
 function extractName(text) {
-  const clean = String(text).trim().replace(/[.!…\s\p{Extended_Pictographic}]+$/u, "");
+  let clean = String(text).trim().replace(/[.!…\s\p{Extended_Pictographic}]+$/u, "");
   if (!clean || clean.includes("?")) return null;
-  const match = clean.match(
-    /^(?:(?:oi|olá|ola|oie)[,!]?\s+)?(?:(?:o\s+)?meu nome (?:é|e)|me chamo|eu me chamo|eu sou (?:o|a)|sou (?:o|a)|pode me chamar de|eu sou)\s+(.+)$/iu
-  );
-  const candidate = (match ? match[1] : clean).trim();
-  const words = candidate.split(/\s+/);
-  if (words.length > 2 || !/^[\p{L}' -]{2,24}$/u.test(candidate)) return null;
-  if (/^(oi+|olá|ola|oie|não|nao|sim|pular|tchau|obrigad[oa]|valeu|bom dia|boa tarde|boa noite|paz|bullying|raiva|briga|nada|ninguém|ninguem)$/i.test(candidate)) {
-    return null;
+  // Saudação no começo ("oi, é a Gaby") sai antes de cortar a frase na vírgula.
+  clean = clean.replace(/^(oi+e?|olá|ola|opa|e a[ií]|eai|salve|bom dia|boa tarde|boa noite)[,!.\s]+/i, "").trim() || clean;
+  // Só o começo da frase: "Gaby, tenho 13 anos" / "Lucas e tenho 10 anos" -> "Gaby" / "Lucas".
+  clean = clean.split(/,|;|\s+e\s+(?=tenho|sou|estou|moro|estudo)|\s+(?=tenho\s+\d)/i)[0].trim();
+  // Tira saudações e jeitos de se apresentar, quantas vezes aparecerem:
+  // "oi, é a Gaby", "pode me chamar de Gaby", "aqui é o João", "meu nome é Ana", "sou a Bia".
+  const prefixes = [
+    /^(oi+e?|olá|ola|opa|e a[ií]|eai|salve|bom dia|boa tarde|boa noite)[,!.\s]+/i,
+    /^(o\s+)?meu nome (é|e)\s+/i,
+    /^(eu\s+)?me cham(o|a)\s+(de\s+)?/i,
+    /^(pode|podes)?\s*(me\s+)?cham(a|ar|e)\s+(me\s+)?de\s+/i,
+    /^(aqui\s+)?(é|e)\s+(o\s+|a\s+)?/i,
+    /^(eu\s+)?sou\s+(o\s+|a\s+)?/i,
+    /^quem fala (é|e)\s+(o\s+|a\s+)?/i,
+    /^nome\s*[:=-]?\s*/i
+  ];
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const prefix of prefixes) {
+      const next = clean.replace(prefix, "").trim();
+      if (next !== clean && next) {
+        clean = next;
+        changed = true;
+      }
+    }
   }
+  const candidate = clean.replace(/\s+(mesmo|rs+|kk+|haha+)$/i, "").trim();
+  const words = candidate.split(/\s+/);
+  if (words.length > 3 || !/^[\p{L}' -]{2,30}$/u.test(candidate)) return null;
+  if (words.some((word) => NOT_NAME_WORDS.has(word.toLowerCase()))) return null;
   return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
 }
 
@@ -390,6 +421,8 @@ function askName() {
   if (!texts) return;
   awaitingName = true;
   inputEl.placeholder = texts.placeholder;
+  // Entra no histórico para a IA saber que a Olive acabou de perguntar o nome.
+  history.push({ role: "assistant", content: texts.ask });
   addAssistantMessage({
     answer: texts.ask,
     chips: [{ label: "Pular", secondary: true, action: () => finishWelcome("") }]
@@ -404,6 +437,11 @@ function finishWelcome(name) {
   inputEl.placeholder = PROFILES[audience].placeholder;
   saveName(name);
   if (!texts) return;
+  // Contexto para a IA, SEM o nome (o nome nunca sai do aparelho).
+  history.push(
+    { role: "user", content: name ? "(a pessoa disse como quer ser chamada)" : "(a pessoa preferiu não dizer o nome)" },
+    { role: "assistant", content: `${texts.intro}\n\n${texts.invite}` }
+  );
   addAssistantMessage({
     answer: `${texts.hello(name)}\n\n${texts.intro}\n\n${texts.invite}`,
     illustration: audience === "crianca" ? "pomba_paz" : null,
