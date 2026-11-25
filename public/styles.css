@@ -52,6 +52,7 @@ button {
 
 .app-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 28px;
   display: grid;
   place-items: center;
@@ -60,7 +61,8 @@ button {
 .chat-panel {
   width: min(1120px, 100%);
   height: min(880px, calc(100vh - 56px));
-  min-height: 640px;
+  height: min(880px, calc(100dvh - 56px));
+  min-height: min(520px, calc(100dvh - 56px));
   display: grid;
   grid-template-rows: auto 1fr auto auto auto;
   overflow: hidden;
@@ -312,8 +314,9 @@ button {
   }
 
   .chat-panel {
-    min-height: 100vh;
+    min-height: 0;
     height: 100vh;
+    height: 100dvh; /* altura visível de verdade no celular (desconta a barra do navegador) */
     border: 0;
     border-radius: 0;
   }
@@ -887,4 +890,125 @@ body[data-audience="crianca"] .chip {
   opacity: 1;
   border-color: var(--accent);
   background: var(--mint);
+}
+
+/* ---------- Ajustes para todas as telas ---------- */
+/* Área das mensagens pode encolher e rolar dentro do painel (sem isso a grade estica a página). */
+.messages {
+  min-height: 0;
+  overscroll-behavior: contain;
+  scroll-padding-top: 12px;
+}
+
+/* Celular deitado e telas baixas de notebook: painel ocupa a tela toda, sem sobrar rolagem na página. */
+@media (max-height: 600px) {
+  .app-shell {
+    padding: 0;
+  }
+
+  .chat-panel {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    border-radius: 0;
+  }
+
+  .topbar {
+    padding-block: 8px;
+  }
+
+  .olive-guide {
+    display: none;
+  }
+}
+
+/* Celular: a Olive de corpo inteiro cobriria as mensagens; ela "vive" no ícone do topo. */
+@media (max-width: 720px) {
+  .olive-guide {
+    display: none;
+  }
+
+  .composer textarea {
+    font-size: 16px; /* evita o zoom automático do iPhone ao tocar na caixa de texto */
+  }
+
+  .story h3 {
+    font-size: 0.98rem;
+  }
+}
+
+.brand-mark img {
+  transform-origin: 50% 80%;
+}
+
+body.olive-talking .brand-mark img {
+  animation: olive-talk 0.45s ease-in-out infinite alternate;
+}
+
+body.olive-cheer .brand-mark img {
+  animation: olive-cheer 0.9s ease-in-out 2;
+}
+
+/* Botões grandes o suficiente para o dedo (mínimo ~44px de área de toque). */
+@media (pointer: coarse) {
+  .chip,
+  .speak,
+  .thumb,
+  .suggestions button,
+  .notice button {
+    min-height: 40px;
+  }
+}
+
+/* ---------- Onde a Olive de corpo inteiro aparece ---------- */
+/* Tablet e celular: sem espaço livre ao lado do chat -> só o ícone animado no topo. */
+@media (max-width: 899px) {
+  .olive-guide {
+    display: none;
+  }
+}
+
+/* Notebook e computador: o chat fica um pouco mais estreito para a Olive ter uma faixa livre à esquerda. */
+@media (min-width: 900px) and (min-height: 601px) {
+  .chat-panel {
+    width: min(1120px, calc(100% - 270px));
+  }
+
+  .olive-guide {
+    display: block;
+    left: 14px;
+    bottom: 22px;
+    width: 118px;
+  }
+
+  .olive-bubble {
+    display: block;
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1500px) and (min-height: 601px) {
+  .olive-guide {
+    width: 150px;
+  }
+
+  .olive-bubble {
+    font-size: 0.88rem;
+  }
+}
+
+/* Telas muito baixas (celular deitado): mais espaço para as mensagens. */
+@media (max-height: 450px) {
+  .suggestions {
+    display: none;
+  }
+
+  .privacy-note {
+    padding: 2px 12px 4px;
+    font-size: 0.7rem;
+  }
+
+  .composer {
+    padding-block: 6px;
+  }
 }

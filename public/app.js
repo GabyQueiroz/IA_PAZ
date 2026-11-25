@@ -120,17 +120,36 @@ function formatText(text) {
     .join("");
 }
 
+const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const scrollBehavior = reduceMotion ? "auto" : "smooth";
+
 function scrollToEnd() {
-  messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: "smooth" });
+  messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: scrollBehavior });
 }
 
-function addNode(html, className = "") {
+// Resposta longa: mostra o COMEÇO dela (com um pedacinho da pergunta acima), para ninguém
+// precisar subir para ler. Resposta curta: rola até o fim, como antes.
+function scrollToMessageStart(node) {
+  requestAnimationFrame(() => {
+    const visible = messagesEl.clientHeight;
+    if (node.offsetHeight <= visible * 0.7) {
+      scrollToEnd();
+      return;
+    }
+    const prev = node.previousElementSibling;
+    const peek = prev?.classList.contains("user") ? Math.min(prev.offsetHeight + 14, 90) : 16;
+    const top = messagesEl.scrollTop + node.getBoundingClientRect().top - messagesEl.getBoundingClientRect().top - peek;
+    messagesEl.scrollTo({ top: Math.max(0, top), behavior: scrollBehavior });
+  });
+}
+
+function addNode(html, { scroll = "end" } = {}) {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = html.trim();
   const node = wrapper.firstElementChild;
-  if (className) node.classList.add(className);
   messagesEl.insertBefore(node, loadingEl && loadingEl.parentNode === messagesEl ? loadingEl : null);
-  scrollToEnd();
+  if (scroll === "start") scrollToMessageStart(node);
+  else scrollToEnd();
   return node;
 }
 
@@ -187,14 +206,19 @@ function oliveSays(text, ms = 6000) {
   clearTimeout(oliveBubbleTimer);
   oliveBubbleTimer = setTimeout(() => oliveBubble.classList.remove("show"), ms);
 }
+// No celular a Olive de corpo inteiro fica escondida: o ícone do topo é que "fala" e "pula".
 function setOliveTalking(value) {
   oliveGuide?.classList.toggle("talking", value);
+  document.body.classList.toggle("olive-talking", value);
 }
 function oliveCheer() {
-  if (!oliveGuide) return;
-  oliveGuide.classList.remove("cheer");
-  void oliveGuide.offsetWidth;
-  oliveGuide.classList.add("cheer");
+  for (const el of [oliveGuide, document.body]) {
+    if (!el) continue;
+    el.classList.remove(el === document.body ? "olive-cheer" : "cheer");
+    void el.offsetWidth;
+    el.classList.add(el === document.body ? "olive-cheer" : "cheer");
+  }
+  setTimeout(() => document.body.classList.remove("olive-cheer"), 2000);
 }
 setTimeout(() => oliveSays("Oi! Eu sou a Olive. Vamos conversar sobre paz? 🕊️", 7000), 600);
 
@@ -257,7 +281,7 @@ function addAssistantMessage(data) {
         ${picture}${story}${tip}${ask}${chips}
         <div class="message-tools">${speakButton}${data.logId ? feedbackButtons : ""}${sources}</div>
       </div>
-    </article>`);
+    </article>`, { scroll: "start" });
   node.querySelector(".speak")?.addEventListener("click", (event) => speak(speakText, event.currentTarget));
   node.querySelectorAll("[data-rating]").forEach((button) =>
     button.addEventListener("click", () => {
